@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import pydeck as pdk
 
 from utils.bom_parser import load_bom, validate_bom, clean_bom, get_bom_template
 from utils.risk_engine import analyze_bom_risk
@@ -20,31 +21,113 @@ def load_sample_events() -> pd.DataFrame:
             "title": "Major earthquake near Taiwan",
             "country": "Taiwan",
             "commodity": "Semiconductor",
-            "severity": "High"
+            "severity": "High",
+            "latitude": 23.6978,
+            "longitude": 120.9605,
         },
         {
             "event_type": "Flood",
             "title": "Flooding impacting port operations in China",
             "country": "China",
             "commodity": "Electronics",
-            "severity": "Medium"
+            "severity": "Medium",
+            "latitude": 31.2304,
+            "longitude": 121.4737,
         },
         {
             "event_type": "Conflict",
             "title": "Conflict risk affecting metal shipments",
             "country": "Ukraine",
             "commodity": "Steel",
-            "severity": "High"
+            "severity": "High",
+            "latitude": 50.4501,
+            "longitude": 30.5234,
         },
         {
             "event_type": "Storm",
             "title": "Storm disruption near Chile logistics corridor",
             "country": "Chile",
             "commodity": "Copper",
-            "severity": "Medium"
+            "severity": "Medium",
+            "latitude": -33.4489,
+            "longitude": -70.6693,
         }
     ]
     return pd.DataFrame(data)
+
+
+def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
+    df = events_df.copy()
+
+    color_map = {
+        "High": [220, 38, 38, 180],     # red
+        "Medium": [245, 158, 11, 180],  # amber
+        "Low": [34, 197, 94, 180],      # green
+    }
+
+    radius_map = {
+        "High": 120000,
+        "Medium": 80000,
+        "Low": 50000,
+    }
+
+    df["color"] = df["severity"].map(color_map)
+    df["radius"] = df["severity"].map(radius_map)
+
+    return df
+
+
+def render_event_map(events_df: pd.DataFrame):
+    if events_df.empty:
+        st.info("No events available for map display.")
+        return
+
+    map_df = add_map_styles(events_df)
+
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=map_df,
+        get_position='[longitude, latitude]',
+        get_fill_color="color",
+        get_radius="radius",
+        pickable=True,
+        opacity=0.8,
+        stroked=True,
+        filled=True,
+        radius_min_pixels=8,
+        radius_max_pixels=40,
+        line_width_min_pixels=1,
+    )
+
+    view_state = pdk.ViewState(
+        latitude=20,
+        longitude=0,
+        zoom=1.2,
+        pitch=0,
+    )
+
+    tooltip = {
+        "html": """
+        <b>Event:</b> {title}<br/>
+        <b>Type:</b> {event_type}<br/>
+        <b>Country:</b> {country}<br/>
+        <b>Commodity:</b> {commodity}<br/>
+        <b>Severity:</b> {severity}
+        """,
+        "style": {
+            "backgroundColor": "black",
+            "color": "white"
+        }
+    }
+
+    deck = pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        tooltip=tooltip,
+        map_style="mapbox://styles/mapbox/dark-v10",
+    )
+
+    st.pydeck_chart(deck, use_container_width=True)
 
 
 st.title("🌍 AI-Inspired Supply Chain Risk Monitor")
@@ -95,15 +178,15 @@ col4.metric("Tracked Commodities", filtered_events["commodity"].nunique())
 
 st.divider()
 
-left_col, right_col = st.columns([1.2, 1])
+left_col, right_col = st.columns([1.1, 1])
 
 with left_col:
     st.subheader("Live Global Events")
     st.dataframe(filtered_events, use_container_width=True, hide_index=True)
 
 with right_col:
-    st.subheader("Live Risk Map Placeholder")
-    st.info("Map will be added in the next step using PyDeck.")
+    st.subheader("Live Risk Map")
+    render_event_map(filtered_events)
 
 st.divider()
 st.subheader("Uploaded BOM Preview")
@@ -158,7 +241,9 @@ if uploaded_file is not None:
                 )
 
                 st.subheader("Priority Recommendations")
-                priority_df = filtered_risk_df[filtered_risk_df["risk_level"].isin(["High", "Medium"])].copy()
+                priority_df = filtered_risk_df[
+                    filtered_risk_df["risk_level"].isin(["High", "Medium"])
+                ].copy()
 
                 if not priority_df.empty:
                     st.dataframe(
