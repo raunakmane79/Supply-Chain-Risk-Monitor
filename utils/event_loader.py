@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
-from urllib.parse import quote_plus
+
+from utils.conflict_loader import fetch_gdelt_conflict_events
 
 
 USGS_ALL_DAY_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
@@ -18,6 +19,8 @@ def get_fallback_events() -> pd.DataFrame:
             "latitude": 31.2304,
             "longitude": 121.4737,
             "source": "Fallback",
+            "magnitude": None,
+            "event_time": pd.NaT,
             "url": "",
         },
         {
@@ -29,6 +32,8 @@ def get_fallback_events() -> pd.DataFrame:
             "latitude": 50.4501,
             "longitude": 30.5234,
             "source": "Fallback",
+            "magnitude": None,
+            "event_time": pd.NaT,
             "url": "",
         },
         {
@@ -40,6 +45,8 @@ def get_fallback_events() -> pd.DataFrame:
             "latitude": -33.4489,
             "longitude": -70.6693,
             "source": "Fallback",
+            "magnitude": None,
+            "event_time": pd.NaT,
             "url": "",
         },
     ]
@@ -259,8 +266,33 @@ def load_all_events() -> pd.DataFrame:
     except Exception:
         pass
 
+    try:
+        conflict_df = fetch_gdelt_conflict_events()
+        if not conflict_df.empty:
+            frames.append(conflict_df)
+    except Exception:
+        pass
+
     fallback_df = get_fallback_events()
-    frames.append(fallback_df)
+    if not fallback_df.empty:
+        frames.append(fallback_df)
+
+    if not frames:
+        return pd.DataFrame(
+            columns=[
+                "event_type",
+                "title",
+                "country",
+                "commodity",
+                "severity",
+                "latitude",
+                "longitude",
+                "source",
+                "magnitude",
+                "event_time",
+                "url",
+            ]
+        )
 
     combined = pd.concat(frames, ignore_index=True, sort=False)
 
@@ -283,30 +315,11 @@ def load_all_events() -> pd.DataFrame:
             combined[col] = None
 
     combined = combined.dropna(subset=["latitude", "longitude"], how="any")
+    combined = combined.drop_duplicates(subset=["title", "latitude", "longitude"])
     combined = combined.sort_values(
-        by=["source", "event_time"],
-        ascending=[True, False],
+        by=["event_time", "source"],
+        ascending=[False, True],
         na_position="last"
     ).reset_index(drop=True)
 
     return combined
-conflict_df = fetch_gdelt_conflict_events()
-    if not conflict_df.empty:
-        frames.append(conflict_df)
-
-    if not frames:
-        return pd.DataFrame(
-            columns=[
-                "title",
-                "event_type",
-                "country",
-                "commodity",
-                "severity",
-                "source",
-                "event_time",
-                "latitude",
-                "longitude",
-            ]
-        )
-
-    return pd.concat(frames, ignore_index=True)
