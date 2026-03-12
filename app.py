@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from utils.bom_parser import load_bom, validate_bom, clean_bom, get_bom_template
+from utils.risk_engine import analyze_bom_risk
 
 
 st.set_page_config(
@@ -122,11 +123,56 @@ if uploaded_file is not None:
             st.success("BOM uploaded and validated successfully.")
             st.dataframe(bom_df, use_container_width=True, hide_index=True)
 
-            st.subheader("Affected BOM Items Placeholder")
-            st.info("Risk matching engine will be added in the next step.")
+            risk_df = analyze_bom_risk(bom_df, filtered_events)
+
+            st.subheader("Affected BOM Items")
+
+            if not risk_df.empty:
+                display_cols = [
+                    "part_number",
+                    "part_name",
+                    "commodity",
+                    "supplier_country",
+                    "matched_event",
+                    "event_type",
+                    "impacted_commodity",
+                    "risk_score",
+                    "risk_level",
+                ]
+                st.dataframe(
+                    risk_df[display_cols],
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                high_risk_count = int((risk_df["risk_level"] == "High").sum())
+                medium_risk_count = int((risk_df["risk_level"] == "Medium").sum())
+                low_risk_count = int((risk_df["risk_level"] == "Low").sum())
+
+                c1, c2, c3 = st.columns(3)
+                c1.metric("High Risk Parts", high_risk_count)
+                c2.metric("Medium Risk Parts", medium_risk_count)
+                c3.metric("Low Risk Parts", low_risk_count)
+
+                st.subheader("Detailed Risk Explanation")
+                st.dataframe(
+                    risk_df[[
+                        "part_name",
+                        "supplier_name",
+                        "supplier_country",
+                        "matched_event",
+                        "risk_level",
+                        "reason"
+                    ]],
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            else:
+                st.info("No risk results generated.")
 
             st.subheader("Recommendations Placeholder")
-            st.info("Procurement recommendations will appear here after risk analysis is built.")
+            st.info("Procurement recommendations will appear here after the recommendation engine is built.")
 
     except Exception as e:
         st.error(f"Error reading file: {e}")
