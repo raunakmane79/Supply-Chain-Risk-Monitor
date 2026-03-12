@@ -20,13 +20,171 @@ from utils.ai_engine import (
     generate_scenario_commentary,
 )
 
-
 st.set_page_config(
     page_title="Supply Chain Risk Monitor",
     page_icon="🌍",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
+st.markdown("""
+<style>
+    .main {
+        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    }
+
+    .block-container {
+        padding-top: 1.2rem;
+        padding-bottom: 2rem;
+        max-width: 1440px;
+    }
+
+    h1, h2, h3 {
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        padding: 1.5rem 1.6rem;
+        border-radius: 22px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.20);
+        margin-bottom: 1rem;
+    }
+
+    .hero-title {
+        font-size: 2.15rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    .section-card {
+        background: rgba(255,255,255,0.96);
+        border: 1px solid rgba(226,232,240,0.95);
+        padding: 1rem 1.1rem;
+        border-radius: 18px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        margin-bottom: 1rem;
+    }
+
+    .insight-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-left: 6px solid #2563eb;
+        padding: 1rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.07);
+        margin-bottom: 0.8rem;
+    }
+
+    .risk-high {
+        border-left-color: #dc2626 !important;
+    }
+
+    .risk-medium {
+        border-left-color: #f59e0b !important;
+    }
+
+    .risk-low {
+        border-left-color: #16a34a !important;
+    }
+
+    .small-muted {
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .pill {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-right: 0.4rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-red { background: #fee2e2; color: #b91c1c; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+    .pill-green { background: #dcfce7; color: #15803d; }
+
+    div[data-testid="stMetric"] {
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 0.95rem 0.85rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    div[data-testid="stMetricLabel"] {
+        font-weight: 700;
+        color: #475569;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stButton > button {
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.55rem 1rem;
+        border: none;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
+    }
+
+    .stDownloadButton > button {
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    }
+
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        background: #e2e8f0;
+        border-radius: 12px;
+        padding: 0.55rem 1rem;
+        font-weight: 700;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: #2563eb !important;
+        color: white !important;
+    }
+
+    .mini-note {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        padding: 0.75rem 0.9rem;
+        border-radius: 14px;
+        color: #1e3a8a;
+        font-size: 0.93rem;
+        margin-bottom: 0.9rem;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 SCENARIOS = {
     "Strait of Hormuz Closure": {
@@ -356,7 +514,6 @@ def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
 
     df["color"] = df.apply(pick_color, axis=1)
     df["radius"] = df.apply(pick_radius, axis=1)
-
     return df
 
 
@@ -718,71 +875,114 @@ def get_reroute_points(start_port, end_port, selected_route_scenario):
     return reroute_templates.get(selected_route_scenario)
 
 
-st.title("🌍 Supply Chain Risk Monitor")
-st.caption(
-    "Track global disruptions, upload a bill of materials, and identify exposed parts with sourcing recommendations."
-)
+def render_priorities(filtered_risk_df: pd.DataFrame):
+    if filtered_risk_df.empty:
+        return
 
-top_left, top_right = st.columns([4, 1])
-with top_right:
-    if st.button("Refresh Live Events"):
-        st.cache_data.clear()
-        st.rerun()
+    top_priority = filtered_risk_df.head(3)
+    st.markdown("### Immediate Priorities")
 
-st.sidebar.header("Controls")
-uploaded_file = st.sidebar.file_uploader(
-    "Upload BOM file",
-    type=["csv", "xlsx", "xls"]
-)
+    for _, row in top_priority.iterrows():
+        risk_class = str(row.get("risk_level", "Low")).lower()
+        risk_css = "risk-high" if risk_class == "high" else "risk-medium" if risk_class == "medium" else "risk-low"
 
-selected_scenario = st.sidebar.selectbox(
-    "Scenario Simulator",
-    options=["None"] + list(SCENARIOS.keys())
-)
+        st.markdown(
+            f"""
+            <div class="insight-card {risk_css}">
+                <b>{row.get('part_name', 'Unknown Part')}</b><br>
+                Supplier Country: {row.get('supplier_country', 'Unknown')}<br>
+                Trigger: {row.get('matched_event', 'N/A')}<br>
+                Recommendation: {row.get('recommendation', 'Review sourcing options.')}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+st.markdown("""
+<div class="hero-card">
+    <div class="hero-title">🌍 Supply Chain Risk Monitor</div>
+    <div class="hero-subtitle">
+        Monitor global disruptions, evaluate BOM exposure, simulate maritime route risk,
+        and prioritize sourcing action from one decision-ready dashboard.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <span class="pill pill-blue">Live Monitoring</span>
+    <span class="pill pill-red">Risk Detection</span>
+    <span class="pill pill-amber">Scenario Planning</span>
+    <span class="pill pill-green">Sourcing Decisions</span>
+    <div class="small-muted" style="margin-top:0.55rem;">
+        Start with live events, then review affected BOM items, then simulate route alternatives if needed.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("## Control Center")
+st.sidebar.markdown("Use the steps below to move from monitoring → analysis → action.")
 
 events_df = get_live_events()
 
 if events_df.empty:
-    st.warning("No live events were loaded. Check your event loaders and internet/API access.")
+    st.warning("No live events were loaded. Check your event loaders and API/internet access.")
 
 event_type_options = sorted(events_df["event_type"].dropna().unique().tolist()) if not events_df.empty else []
 severity_options = sorted(events_df["severity"].dropna().unique().tolist()) if not events_df.empty else []
 
-selected_event_types = st.sidebar.multiselect(
-    "Filter by Event Type",
-    options=event_type_options,
-    default=event_type_options
-)
-
-selected_severity = st.sidebar.multiselect(
-    "Filter by Severity",
-    options=severity_options,
-    default=severity_options
-)
-
-selected_risk_levels = st.sidebar.multiselect(
-    "Filter by Risk Level",
-    options=["High", "Medium", "Low"],
-    default=["High", "Medium", "Low"]
-)
-
-st.sidebar.subheader("Route Simulator")
-
-simulator_mode = st.sidebar.checkbox("Enable Route Simulator", value=False)
-
-start_port = None
-end_port = None
-selected_route_scenario = "None"
-
-if simulator_mode:
-    port_names = sorted(PORTS.keys())
-    start_port = st.sidebar.selectbox("Start Port", port_names, index=0, key="route_start_port")
-    end_port = st.sidebar.selectbox("End Port", port_names, index=1, key="route_end_port")
-    selected_route_scenario = st.sidebar.selectbox(
-        "Route Scenario",
-        ["None"] + list(SCENARIO_ZONES.keys()),
-        key="route_scenario"
+with st.sidebar.expander("1️⃣ Event Monitoring", expanded=True):
+    selected_scenario = st.selectbox(
+        "Scenario Simulator",
+        options=["None"] + list(SCENARIOS.keys())
     )
+
+    selected_event_types = st.multiselect(
+        "Filter by Event Type",
+        options=event_type_options,
+        default=event_type_options
+    )
+
+    selected_severity = st.multiselect(
+        "Filter by Severity",
+        options=severity_options,
+        default=severity_options
+    )
+
+with st.sidebar.expander("2️⃣ BOM Analysis", expanded=True):
+    uploaded_file = st.file_uploader(
+        "Upload BOM file",
+        type=["csv", "xlsx", "xls"]
+    )
+
+    selected_risk_levels = st.multiselect(
+        "Filter by Risk Level",
+        options=["High", "Medium", "Low"],
+        default=["High", "Medium", "Low"]
+    )
+
+with st.sidebar.expander("3️⃣ Route Simulation", expanded=False):
+    simulator_mode = st.checkbox("Enable Route Simulator", value=False)
+
+    start_port = None
+    end_port = None
+    selected_route_scenario = "None"
+
+    if simulator_mode:
+        port_names = sorted(PORTS.keys())
+        start_port = st.selectbox("Start Port", port_names, index=0, key="route_start_port")
+        end_port = st.selectbox("End Port", port_names, index=1, key="route_end_port")
+        selected_route_scenario = st.selectbox(
+            "Route Scenario",
+            ["None"] + list(SCENARIO_ZONES.keys()),
+            key="route_scenario"
+        )
+
+st.sidebar.markdown("---")
+if st.sidebar.button("🔄 Refresh Live Events", use_container_width=True):
+    st.cache_data.clear()
+    st.rerun()
 
 if not events_df.empty:
     filtered_events = events_df[
@@ -794,7 +994,9 @@ else:
 
 filtered_events = apply_scenario(filtered_events, selected_scenario)
 
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.markdown("### Executive Summary")
+
 col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Live Events", len(filtered_events))
 col2.metric("High Severity Events", int((filtered_events["severity"] == "High").sum()) if not filtered_events.empty else 0)
@@ -802,10 +1004,14 @@ col3.metric("Countries Affected", filtered_events["country"].nunique() if not fi
 col4.metric("Tracked Commodities", filtered_events["commodity"].nunique() if not filtered_events.empty else 0)
 col5.metric("Live Feed Sources", filtered_events["source"].nunique() if not filtered_events.empty else 0)
 
-legend_col1, legend_col2, legend_col3 = st.columns(3)
-legend_col1.markdown("🟥 **High Risk / Conflict**")
-legend_col2.markdown("🟨 **Medium Risk / Shipping / Sanctions**")
-legend_col3.markdown("🟩 **Low Risk / General**")
+st.markdown("""
+<div style="margin-top:0.7rem;">
+    <span class="pill pill-red">🟥 High Risk / Conflict</span>
+    <span class="pill pill-amber">🟨 Medium Risk / Shipping / Sanctions</span>
+    <span class="pill pill-green">🟩 Low Risk / General</span>
+</div>
+""", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 ai_commentary = None
 risk_df = pd.DataFrame()
@@ -820,12 +1026,17 @@ events_summary = {
     "selected_scenario": selected_scenario,
 }
 
-st.divider()
+tab1, tab2, tab3, tab4 = st.tabs([
+    "🌐 Live Events",
+    "🗺 Risk Map",
+    "📈 Trends & Regions",
+    "📦 BOM Analysis"
+])
 
-left_col, right_col = st.columns([1.05, 1])
-
-with left_col:
+with tab1:
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.subheader("Live Global Events")
+
     event_display_cols = [
         "event_type", "title", "country", "commodity", "severity", "source", "event_time"
     ]
@@ -840,137 +1051,182 @@ with left_col:
             .reset_index(name="event_count")
             .sort_values("event_count", ascending=False)
         )
+
         st.markdown("#### Event Source Mix")
         st.dataframe(source_summary, use_container_width=True, hide_index=True)
 
         if "url" in filtered_events.columns:
-            st.markdown("#### Source Links")
-            for _, row in filtered_events.head(10).iterrows():
-                if pd.notna(row.get("url")) and row.get("url"):
-                    st.markdown(f"- [{row['title']}]({row['url']})")
+            with st.expander("Top Source Links"):
+                shown = 0
+                for _, row in filtered_events.iterrows():
+                    if pd.notna(row.get("url")) and row.get("url"):
+                        st.markdown(f"- [{row['title']}]({row['url']})")
+                        shown += 1
+                    if shown >= 10:
+                        break
     else:
-        st.info("No events match the current filters.")
+        st.info("No events match the current filters. Try broadening event type or severity filters.")
 
-    st.markdown("#### Timeline View")
-    render_timeline(filtered_events)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-with right_col:
+with tab2:
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.subheader("Live Risk Map")
     render_event_map(filtered_events)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("#### Regional Summary Panel")
-    render_regional_summary(filtered_events)
+with tab3:
+    trend_col, region_col = st.columns([1.2, 1])
 
-st.divider()
-st.subheader("BOM Risk Analysis")
+    with trend_col:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.markdown("#### Timeline View")
+        render_timeline(filtered_events)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-if uploaded_file is not None:
-    try:
-        raw_bom_df = load_bom(uploaded_file)
-        is_valid, missing_columns = validate_bom(raw_bom_df)
+    with region_col:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.markdown("#### Regional Summary")
+        render_regional_summary(filtered_events)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        if not is_valid:
-            st.error("Missing required BOM columns: " + ", ".join(missing_columns))
-            st.markdown("#### Required Minimum Columns")
-            st.code("part_name, supplier_country")
-        else:
-            bom_df = clean_bom(raw_bom_df)
+with tab4:
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("BOM Risk Analysis")
+    st.caption("Upload a BOM to identify exposed parts, understand why they are at risk, and export decision-ready results.")
 
-            bom_col1, bom_col2 = st.columns([1.3, 1])
-            with bom_col1:
-                st.success("BOM uploaded and validated successfully.")
-                st.dataframe(bom_df, use_container_width=True, hide_index=True)
+    if uploaded_file is not None:
+        try:
+            raw_bom_df = load_bom(uploaded_file)
+            is_valid, missing_columns = validate_bom(raw_bom_df)
 
-            with bom_col2:
-                st.markdown("#### Uploaded BOM Summary")
-                st.metric("Total Parts", len(bom_df))
-                st.metric("Supplier Countries", bom_df["supplier_country"].nunique())
-                if "commodity" in bom_df.columns:
-                    tracked = bom_df["commodity"].replace("", pd.NA).dropna().nunique()
-                    st.metric("Tracked BOM Commodities", tracked)
-
-            risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
-
-            if not risk_df.empty:
-                risk_df = add_recommendations(risk_df, bom_df)
-
-                filtered_risk_df = risk_df[
-                    risk_df["risk_level"].isin(selected_risk_levels)
-                ].copy()
-
-                st.subheader("Affected BOM Items")
-
-                rc1, rc2, rc3 = st.columns(3)
-                rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
-                rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
-                rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
-
-                display_cols = [
-                    "part_number",
-                    "part_name",
-                    "commodity",
-                    "supplier_country",
-                    "matched_event",
-                    "event_type",
-                    "impacted_commodity",
-                    "rule_trigger",
-                    "risk_score",
-                    "risk_level",
-                ]
-                existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
-
-                st.dataframe(
-                    filtered_risk_df[existing_display_cols],
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                st.subheader("Detailed Risk Explanation")
-                explanation_cols = [
-                    "part_name",
-                    "supplier_name",
-                    "supplier_country",
-                    "matched_event",
-                    "risk_level",
-                    "rule_trigger",
-                    "inferred_commodities",
-                    "reason",
-                    "recommendation",
-                ]
-                explanation_cols = [col for col in explanation_cols if col in filtered_risk_df.columns]
-
-                st.dataframe(
-                    filtered_risk_df[explanation_cols],
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                csv_export = filtered_risk_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    label="Download Risk Analysis Results",
-                    data=csv_export,
-                    file_name="risk_analysis_results.csv",
-                    mime="text/csv"
-                )
+            if not is_valid:
+                st.error("Missing required BOM columns: " + ", ".join(missing_columns))
+                st.markdown("#### Required Minimum Columns")
+                st.code("part_name, supplier_country")
             else:
-                st.info("No BOM items are directly affected by the current live events.")
+                bom_df = clean_bom(raw_bom_df)
 
-    except Exception as e:
-        st.error(f"Error reading file: {e}")
-else:
-    st.info("Upload a BOM file from the sidebar to begin analysis.")
+                st.markdown('<div class="mini-note">Your BOM has been uploaded. Review the summary first, then focus on high-risk items and immediate priorities.</div>', unsafe_allow_html=True)
 
-    sample_bom = get_bom_template()
-    st.markdown("#### Sample BOM Format")
-    st.dataframe(sample_bom, use_container_width=True, hide_index=True)
+                bom_col1, bom_col2 = st.columns([1.35, 1])
+                with bom_col1:
+                    st.success("BOM uploaded and validated successfully.")
+                    st.dataframe(bom_df, use_container_width=True, hide_index=True)
 
-    csv_data = sample_bom.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="Download Sample BOM Template",
-        data=csv_data,
-        file_name="sample_bom_template.csv",
-        mime="text/csv"
-    )
+                with bom_col2:
+                    st.markdown("#### Uploaded BOM Summary")
+                    st.metric("Total Parts", len(bom_df))
+                    st.metric("Supplier Countries", bom_df["supplier_country"].nunique())
+                    if "commodity" in bom_df.columns:
+                        tracked = bom_df["commodity"].replace("", pd.NA).dropna().nunique()
+                        st.metric("Tracked BOM Commodities", tracked)
+
+                risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
+
+                if not risk_df.empty:
+                    risk_df = add_recommendations(risk_df, bom_df)
+
+                    filtered_risk_df = risk_df[
+                        risk_df["risk_level"].isin(selected_risk_levels)
+                    ].copy()
+
+                    if not filtered_risk_df.empty:
+                        risk_order = {"High": 0, "Medium": 1, "Low": 2}
+                        filtered_risk_df["risk_order"] = filtered_risk_df["risk_level"].map(risk_order).fillna(99)
+                        sort_cols = ["risk_order"]
+                        ascending = [True]
+
+                        if "risk_score" in filtered_risk_df.columns:
+                            sort_cols.append("risk_score")
+                            ascending.append(False)
+
+                        filtered_risk_df = filtered_risk_df.sort_values(sort_cols, ascending=ascending).drop(columns=["risk_order"])
+
+                    rc1, rc2, rc3 = st.columns(3)
+                    rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
+                    rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
+                    rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
+
+                    render_priorities(filtered_risk_df)
+
+                    st.subheader("Affected BOM Items")
+                    display_cols = [
+                        "part_number",
+                        "part_name",
+                        "commodity",
+                        "supplier_country",
+                        "matched_event",
+                        "event_type",
+                        "impacted_commodity",
+                        "rule_trigger",
+                        "risk_score",
+                        "risk_level",
+                    ]
+                    existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
+
+                    if not filtered_risk_df.empty and existing_display_cols:
+                        st.dataframe(
+                            filtered_risk_df[existing_display_cols],
+                            use_container_width=True,
+                            hide_index=True
+                        )
+
+                    st.subheader("Detailed Risk Explanation")
+                    explanation_cols = [
+                        "part_name",
+                        "supplier_name",
+                        "supplier_country",
+                        "matched_event",
+                        "risk_level",
+                        "rule_trigger",
+                        "inferred_commodities",
+                        "reason",
+                        "recommendation",
+                    ]
+                    explanation_cols = [col for col in explanation_cols if col in filtered_risk_df.columns]
+
+                    if not filtered_risk_df.empty and explanation_cols:
+                        st.dataframe(
+                            filtered_risk_df[explanation_cols],
+                            use_container_width=True,
+                            hide_index=True
+                        )
+
+                    csv_export = filtered_risk_df.to_csv(index=False).encode("utf-8")
+                    st.download_button(
+                        label="Download Risk Analysis Results",
+                        data=csv_export,
+                        file_name="risk_analysis_results.csv",
+                        mime="text/csv"
+                    )
+                else:
+                    st.info("No BOM items are directly affected right now. Current exposure appears limited under the selected filters.")
+
+        except Exception as e:
+            st.error(f"Error reading file: {e}")
+
+    else:
+        st.markdown("""
+        <div class="insight-card">
+            <b>Get started:</b> Upload your BOM from the sidebar to compare supplier locations
+            and commodities against live disruption events.
+        </div>
+        """, unsafe_allow_html=True)
+
+        sample_bom = get_bom_template()
+        st.markdown("#### Sample BOM Format")
+        st.dataframe(sample_bom, use_container_width=True, hide_index=True)
+
+        csv_data = sample_bom.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download Sample BOM Template",
+            data=csv_data,
+            file_name="sample_bom_template.csv",
+            mime="text/csv"
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 bom_summary = {}
 if not risk_df.empty:
@@ -994,12 +1250,41 @@ except Exception as e:
 if ai_commentary:
     st.divider()
     st.subheader("AI Risk Commentary")
-    st.info(ai_commentary.get("executive_summary", "No commentary available."))
-    st.write(f"**Urgency:** {ai_commentary.get('urgency', 'Unknown')}")
-    st.write("**Top risks:**")
+
+    st.markdown(
+        f"""
+        <div class="insight-card risk-high">
+            <b>Executive Summary</b><br>
+            {ai_commentary.get("executive_summary", "No commentary available.")}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    a1, a2 = st.columns([1, 2])
+    with a1:
+        st.metric("Urgency", ai_commentary.get("urgency", "Unknown"))
+    with a2:
+        st.markdown(
+            f"""
+            <div class="section-card">
+                <b>Recommended Action</b><br>
+                {ai_commentary.get('recommended_action', 'No recommendation available.')}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("#### Top Risks")
     for item in ai_commentary.get("top_risks", []):
-        st.write(f"- {item}")
-    st.write(f"**Recommended action:** {ai_commentary.get('recommended_action', 'No recommendation available.')}")
+        st.markdown(
+            f"""
+            <div class="insight-card risk-medium">
+                {item}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 if not filtered_risk_df.empty:
     st.divider()
@@ -1034,11 +1319,13 @@ if not filtered_risk_df.empty:
                     json.dumps(part_context, sort_keys=True)
                 )
 
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.write(f"**Best option:** {alt_result.get('best_option', 'N/A')}")
             for item in alt_result.get("ranking", []):
                 st.write(f"{item.get('rank', '-')}. {item.get('supplier', 'Unknown')} — Score: {item.get('score', 'N/A')}")
                 st.caption(item.get("reason", ""))
             st.write(f"**Switch recommendation:** {alt_result.get('switch_recommendation', 'No recommendation available.')}")
+            st.markdown("</div>", unsafe_allow_html=True)
         except Exception as e:
             st.warning(f"AI alternate sourcing unavailable: {e}")
 
@@ -1066,100 +1353,117 @@ if selected_scenario != "None":
                 json.dumps(scenario_context, sort_keys=True)
             )
 
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.write(f"**Summary:** {scenario_ai.get('scenario_summary', 'No summary available.')}")
         st.write(f"**Operational impact:** {scenario_ai.get('operational_impact', 'No operational impact available.')}")
         st.write(f"**Procurement impact:** {scenario_ai.get('procurement_impact', 'No procurement impact available.')}")
         st.write(f"**Recommended response:** {scenario_ai.get('recommended_response', 'No response available.')}")
+        st.markdown("</div>", unsafe_allow_html=True)
     except Exception as e:
         st.warning(f"AI scenario analysis unavailable: {e}")
 
 if simulator_mode and start_port and end_port:
     st.divider()
-    st.subheader("Route Impact Simulator")
-
-    if start_port == end_port:
-        st.warning("Please select different start and end ports.")
-    else:
-        node_path, route_points, total_distance = build_dynamic_route(start_port, end_port)
-
-        if not route_points:
-            st.error("No route could be calculated for the selected ports.")
+    with st.expander("🚢 Route Impact Simulator", expanded=True):
+        if start_port == end_port:
+            st.warning("Please select different start and end ports.")
         else:
-            impacted = False
-            scenario_df = pd.DataFrame()
-            reroute_df = pd.DataFrame()
+            node_path, route_points, total_distance = build_dynamic_route(start_port, end_port)
 
-            if selected_route_scenario != "None":
-                scenario = SCENARIO_ZONES[selected_route_scenario]
-                impacted = route_impacted(route_points, scenario)
-                scenario_df = build_scenario_df(selected_route_scenario)
+            if not route_points:
+                st.error("No route could be calculated for the selected ports.")
+            else:
+                impacted = False
+                scenario_df = pd.DataFrame()
+                reroute_df = pd.DataFrame()
 
-                reroute_points = get_reroute_points(start_port, end_port, selected_route_scenario)
-                if impacted and reroute_points:
-                    reroute_df = build_route_df(reroute_points, reroute=True)
+                if selected_route_scenario != "None":
+                    scenario = SCENARIO_ZONES[selected_route_scenario]
+                    impacted = route_impacted(route_points, scenario)
+                    scenario_df = build_scenario_df(selected_route_scenario)
 
-            route_df = build_route_df(route_points, impacted=impacted)
-            ports_df = build_port_points_df(start_port, end_port)
+                    reroute_points = get_reroute_points(start_port, end_port, selected_route_scenario)
+                    if impacted and reroute_points:
+                        reroute_df = build_route_df(reroute_points, reroute=True)
 
-            render_route_simulator_map(
-                route_df=route_df,
-                scenario_df=scenario_df,
-                ports_df=ports_df,
-                reroute_df=reroute_df if not reroute_df.empty else None
-            )
+                route_df = build_route_df(route_points, impacted=impacted)
+                ports_df = build_port_points_df(start_port, end_port)
 
-            sim_col1, sim_col2, sim_col3 = st.columns(3)
-            sim_col1.metric("Estimated Route Distance", f"{total_distance:,.0f} km")
-            sim_col2.metric("Scenario Selected", selected_route_scenario)
-            sim_col3.metric("Impact Status", "Impacted" if impacted else "Clear")
+                st.markdown(
+                    f"""
+                    <div class="section-card">
+                        <b>Route Summary</b><br>
+                        Origin: {start_port} &nbsp;&nbsp;|&nbsp;&nbsp;
+                        Destination: {end_port} &nbsp;&nbsp;|&nbsp;&nbsp;
+                        Scenario: {selected_route_scenario}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            st.markdown("#### Calculated Maritime Path")
-            st.code(" → ".join(node_path))
+                render_route_simulator_map(
+                    route_df=route_df,
+                    scenario_df=scenario_df,
+                    ports_df=ports_df,
+                    reroute_df=reroute_df if not reroute_df.empty else None
+                )
 
-            if selected_route_scenario != "None":
-                delay = estimate_delay_days(selected_route_scenario, impacted)
+                sim_col1, sim_col2, sim_col3 = st.columns(3)
+                sim_col1.metric("Estimated Route Distance", f"{total_distance:,.0f} km")
+                sim_col2.metric("Scenario Selected", selected_route_scenario)
+                sim_col3.metric("Impact Status", "Impacted" if impacted else "Clear")
 
-                if impacted:
-                    st.error(f"This route is impacted by {selected_route_scenario}.")
-                    st.write(f"**Expected Delay Impact:** {delay}")
-                    st.write("**Likely Effect:** Higher transit-time risk, schedule volatility, and potential freight cost escalation.")
-                    st.write("**Suggested Action:** Review alternate routing, rebalance safety stock, and evaluate backup sourcing.")
+                st.markdown("#### Calculated Maritime Path")
+                st.code(" → ".join(node_path))
 
-                    if not reroute_df.empty:
-                        st.write("**Reroute Option Displayed:** A fallback detour path has been drawn in purple.")
-                else:
-                    st.success(f"This route is not directly impacted by {selected_route_scenario}.")
-                    st.write("**Expected Delay Impact:** None to limited direct impact based on current route geometry.")
+                if selected_route_scenario != "None":
+                    delay = estimate_delay_days(selected_route_scenario, impacted)
 
-            if selected_route_scenario != "None":
-                route_scenario_context = {
-                    "start_port": start_port,
-                    "end_port": end_port,
-                    "scenario": selected_route_scenario,
-                    "route_impacted": impacted,
-                    "route_nodes": node_path,
-                    "estimated_distance_km": round(total_distance, 2),
-                }
+                    if impacted:
+                        st.error(f"This route is impacted by {selected_route_scenario}.")
+                        st.write(f"**Expected Delay Impact:** {delay}")
+                        st.write("**Likely Effect:** Higher transit-time risk, schedule volatility, and potential freight cost escalation.")
+                        st.write("**Suggested Action:** Review alternate routing, rebalance safety stock, and evaluate backup sourcing.")
 
-                try:
-                    with st.spinner("Generating AI route impact assessment..."):
-                        route_ai = cached_ai_scenario_commentary(
-                            json.dumps(route_scenario_context, sort_keys=True)
-                        )
+                        if not reroute_df.empty:
+                            st.write("**Reroute Option Displayed:** A fallback detour path has been drawn in purple.")
+                    else:
+                        st.success(f"This route is not directly impacted by {selected_route_scenario}.")
+                        st.write("**Expected Delay Impact:** None to limited direct impact based on current route geometry.")
 
-                    st.markdown("#### AI Route Assessment")
-                    st.write(f"**Summary:** {route_ai.get('scenario_summary', 'No summary available.')}")
-                    st.write(f"**Operational impact:** {route_ai.get('operational_impact', 'No operational impact available.')}")
-                    st.write(f"**Procurement impact:** {route_ai.get('procurement_impact', 'No procurement impact available.')}")
-                    st.write(f"**Recommended response:** {route_ai.get('recommended_response', 'No response available.')}")
-                except Exception as e:
-                    st.warning(f"AI route assessment unavailable: {e}")
+                if selected_route_scenario != "None":
+                    route_scenario_context = {
+                        "start_port": start_port,
+                        "end_port": end_port,
+                        "scenario": selected_route_scenario,
+                        "route_impacted": impacted,
+                        "route_nodes": node_path,
+                        "estimated_distance_km": round(total_distance, 2),
+                    }
+
+                    try:
+                        with st.spinner("Generating AI route impact assessment..."):
+                            route_ai = cached_ai_scenario_commentary(
+                                json.dumps(route_scenario_context, sort_keys=True)
+                            )
+
+                        st.markdown("#### AI Route Assessment")
+                        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+                        st.write(f"**Summary:** {route_ai.get('scenario_summary', 'No summary available.')}")
+                        st.write(f"**Operational impact:** {route_ai.get('operational_impact', 'No operational impact available.')}")
+                        st.write(f"**Procurement impact:** {route_ai.get('procurement_impact', 'No procurement impact available.')}")
+                        st.write(f"**Recommended response:** {route_ai.get('recommended_response', 'No response available.')}")
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    except Exception as e:
+                        st.warning(f"AI route assessment unavailable: {e}")
 
 st.divider()
-st.markdown(
-    """
-    **How it works:**  
-    The platform monitors live disruption signals, maps affected geographies, compares them with supplier locations and commodities in the uploaded BOM, and highlights parts that may need sourcing action.  
-    AI then interprets the event landscape, summarizes major risks, ranks alternate sourcing paths, evaluates disruption scenarios, and simulates route exposure across major maritime corridors.
-    """
-)
+st.markdown("""
+<div class="section-card">
+    <b>How the platform works</b><br><br>
+    1. It ingests live disruption signals across geographies and commodities.<br>
+    2. It maps those disruptions against supplier countries and BOM attributes.<br>
+    3. It flags exposed parts, recommends sourcing actions, and simulates route-level disruption impact.<br>
+    4. AI layers summarize the risk landscape and help prioritize response decisions.
+</div>
+""", unsafe_allow_html=True)
