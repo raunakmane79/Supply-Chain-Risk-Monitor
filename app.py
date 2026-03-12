@@ -20,6 +20,7 @@ from utils.ai_engine import (
     generate_scenario_commentary,
 )
 
+
 st.set_page_config(
     page_title="Supply Chain Risk Monitor",
     page_icon="🌍",
@@ -27,146 +28,246 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
     :root {
-        --bg: #f4f7fb;
-        --surface: #ffffff;
-        --surface-2: #f8fafc;
-        --border: #dbe3ef;
+        --bg: #f6f8fb;
+        --panel: rgba(255,255,255,0.78);
+        --panel-solid: #ffffff;
+        --panel-2: #f9fbfd;
+        --line: rgba(15, 23, 42, 0.08);
+        --line-strong: rgba(15, 23, 42, 0.14);
         --text: #0f172a;
         --muted: #64748b;
+        --navy: #0f172a;
+        --blue: #2563eb;
+        --blue-soft: rgba(37, 99, 235, 0.10);
+        --red: #dc2626;
+        --red-soft: rgba(220, 38, 38, 0.10);
+        --amber: #d97706;
+        --amber-soft: rgba(217, 119, 6, 0.11);
+        --green: #16a34a;
+        --green-soft: rgba(22, 163, 74, 0.10);
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.05);
+        --shadow-md: 0 18px 50px rgba(15, 23, 42, 0.08);
+    }
 
-        --sidebar-bg-1: #0b1220;
-        --sidebar-bg-2: #111c34;
-        --sidebar-surface: rgba(255,255,255,0.04);
-        --sidebar-border: rgba(255,255,255,0.08);
-
-        --primary: #2563eb;
-        --primary-soft: #dbeafe;
-
-        --danger: #dc2626;
-        --danger-soft: #fee2e2;
-
-        --warning: #d97706;
-        --warning-soft: #fef3c7;
-
-        --success: #16a34a;
-        --success-soft: #dcfce7;
-
-        --radius: 14px;
-        --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    html, body, [class*="css"] {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .stApp {
-        background: var(--bg);
+        background:
+            radial-gradient(circle at top left, rgba(37,99,235,0.06), transparent 25%),
+            radial-gradient(circle at top right, rgba(15,23,42,0.06), transparent 22%),
+            var(--bg);
+        color: var(--text);
     }
 
     .block-container {
-        max-width: 1400px;
-        padding-top: 1.25rem;
+        max-width: 1520px;
+        padding-top: 1.1rem;
         padding-bottom: 2rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
     }
 
-    h1, h2, h3 {
+    h1, h2, h3, h4 {
         color: var(--text);
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
     }
 
-    p, label, div {
+    p, label, div, span {
         color: var(--text);
     }
 
-    .hero-card {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        color: white;
-        padding: 1.4rem 1.5rem;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #081120 0%, #0f172a 55%, #111827 100%);
+        border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1rem;
+    }
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] small {
+        color: #f8fafc !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    [data-testid="stSidebar"] .stExpander details summary {
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div,
+    [data-testid="stSidebar"] .stFileUploader section,
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stNumberInput input {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: white !important;
+        border-radius: 14px !important;
+    }
+
+    [data-testid="stSidebar"] .stButton button,
+    [data-testid="stSidebar"] .stDownloadButton button {
+        background: white !important;
+        color: #0f172a !important;
+        border: 0 !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+    }
+
+    .top-shell {
         margin-bottom: 1rem;
     }
 
+    .hero {
+        background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,255,255,0.70));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.55);
+        box-shadow: var(--shadow-md);
+        border-radius: 28px;
+        padding: 1.5rem 1.5rem 1.35rem 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(37,99,235,0.10), transparent 45%, rgba(15,23,42,0.05));
+        pointer-events: none;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.38rem 0.72rem;
+        border-radius: 999px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-bottom: 0.9rem;
+    }
+
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1.45fr 0.85fr;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
     .hero-title {
-        font-size: 2rem;
+        font-size: 2.35rem;
+        line-height: 1.02;
         font-weight: 800;
-        margin-bottom: 0.35rem;
-        color: white;
+        margin: 0 0 0.6rem 0;
     }
 
     .hero-subtitle {
         font-size: 1rem;
-        line-height: 1.6;
-        color: rgba(255,255,255,0.88);
+        line-height: 1.7;
+        color: var(--muted);
+        max-width: 760px;
     }
 
-    .section-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1rem 1.1rem;
-        box-shadow: var(--shadow);
+    .hero-kicker {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 0.8rem;
+    }
+
+    .hero-mini {
+        background: rgba(15,23,42,0.04);
+        border: 1px solid rgba(15,23,42,0.08);
+        border-radius: 18px;
+        padding: 0.95rem 1rem;
+    }
+
+    .hero-mini-label {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .hero-mini-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .shell-card {
+        background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.65);
+        border-radius: 24px;
+        padding: 1rem 1rem 1.05rem 1rem;
+        box-shadow: var(--shadow-sm);
         margin-bottom: 1rem;
     }
 
-    .insight-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-left: 4px solid var(--primary);
-        border-radius: var(--radius);
-        padding: 0.95rem 1rem;
-        box-shadow: var(--shadow);
-        margin-bottom: 0.75rem;
+    .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.9rem;
     }
 
-    .risk-high { border-left-color: var(--danger) !important; }
-    .risk-medium { border-left-color: var(--warning) !important; }
-    .risk-low { border-left-color: var(--success) !important; }
+    .section-title {
+        font-size: 1.08rem;
+        font-weight: 750;
+        color: var(--text);
+        letter-spacing: -0.02em;
+    }
 
-    .small-muted {
+    .section-caption {
+        font-size: 0.92rem;
         color: var(--muted);
-        font-size: 0.93rem;
     }
 
-    .pill {
-        display: inline-block;
-        padding: 0.38rem 0.8rem;
-        border-radius: 999px;
-        font-size: 0.82rem;
-        font-weight: 700;
-        margin-right: 0.45rem;
-        margin-bottom: 0.45rem;
-        border: 1px solid transparent;
-    }
-
-    .pill-blue {
-        background: var(--primary-soft);
-        color: #1d4ed8;
-        border-color: #bfdbfe;
-    }
-
-    .pill-red {
-        background: var(--danger-soft);
-        color: #b91c1c;
-        border-color: #fecaca;
-    }
-
-    .pill-amber {
-        background: var(--warning-soft);
-        color: #b45309;
-        border-color: #fde68a;
-    }
-
-    .pill-green {
-        background: var(--success-soft);
-        color: #15803d;
-        border-color: #bbf7d0;
+    .metric-card {
+        background: rgba(255,255,255,0.72);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 1rem;
     }
 
     div[data-testid="stMetric"] {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 0.9rem 0.85rem;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 0.9rem 0.95rem;
         box-shadow: none;
     }
 
@@ -177,102 +278,152 @@ st.markdown("""
 
     div[data-testid="stMetricValue"] {
         color: var(--text);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 0.25rem;
+    }
+
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        padding: 0.48rem 0.82rem;
+        font-size: 0.82rem;
         font-weight: 700;
-    }
-
-    div[data-testid="stDataFrame"] {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-        background: white;
-    }
-
-    .stButton > button,
-    .stDownloadButton > button {
-        border-radius: 12px;
         border: 1px solid transparent;
-        background: var(--primary);
-        color: white;
-        font-weight: 700;
-        box-shadow: none;
     }
 
-    .stButton > button:hover,
-    .stDownloadButton > button:hover {
-        background: #1d4ed8;
+    .pill.high {
+        background: var(--red-soft);
+        color: var(--red);
+        border-color: rgba(220,38,38,0.18);
     }
 
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 100%);
-        border-right: 1px solid rgba(255,255,255,0.05);
+    .pill.medium {
+        background: var(--amber-soft);
+        color: var(--amber);
+        border-color: rgba(217,119,6,0.18);
     }
 
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] span {
-        color: #f8fafc !important;
+    .pill.low {
+        background: var(--green-soft);
+        color: var(--green);
+        border-color: rgba(22,163,74,0.16);
     }
 
-    section[data-testid="stSidebar"] .stExpander {
-        background: var(--sidebar-surface);
-        border: 1px solid var(--sidebar-border);
-        border-radius: 12px;
+    .note-strip {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.9rem 1rem;
+        border-radius: 18px;
+        background: linear-gradient(90deg, rgba(37,99,235,0.08), rgba(255,255,255,0.35));
+        border: 1px solid rgba(37,99,235,0.12);
+        color: var(--muted);
+        margin-top: 0.2rem;
     }
 
-    section[data-testid="stSidebar"] .stTextInput input,
-    section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div,
-    section[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] > div,
-    section[data-testid="stSidebar"] .stFileUploader section,
-    section[data-testid="stSidebar"] .stNumberInput input {
-        background: rgba(255,255,255,0.06) !important;
-        color: white !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
-        border-radius: 10px !important;
+    .subtle-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0,1fr));
+        gap: 1rem;
     }
 
-    section[data-testid="stSidebar"] .stCheckbox {
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
+    .insight {
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.72);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .insight.high {
+        border-left: 4px solid var(--red);
+    }
+
+    .insight.medium {
+        border-left: 4px solid var(--amber);
+    }
+
+    .insight.low {
+        border-left: 4px solid var(--green);
+    }
+
+    .insight-title {
+        font-weight: 750;
+        margin-bottom: 0.35rem;
+    }
+
+    .muted {
+        color: var(--muted);
     }
 
     .stTabs [data-baseweb="tab-list"] {
         gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .stTabs [data-baseweb="tab"] {
-        background: #e9eef5;
-        border-radius: 10px;
-        padding: 0.45rem 0.9rem;
-        font-weight: 600;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0.45rem 0.85rem;
         color: #334155;
+        font-weight: 700;
     }
 
     .stTabs [aria-selected="true"] {
-        background: var(--primary) !important;
+        background: #0f172a !important;
         color: white !important;
+        border-color: #0f172a !important;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.92);
+    }
+
+    .stButton button,
+    .stDownloadButton button {
+        background: #0f172a;
+        color: white;
+        border: 0;
+        border-radius: 14px;
+        padding: 0.64rem 1rem;
+        font-weight: 700;
+    }
+
+    .stButton button:hover,
+    .stDownloadButton button:hover {
+        background: #111f38;
+        color: white;
     }
 
     hr {
         border: none;
-        border-top: 1px solid var(--border);
-        margin: 1.2rem 0;
+        border-top: 1px solid var(--line);
+        margin: 1rem 0 1.2rem 0;
     }
 
-    .mini-note {
-        background: #f8fafc;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 0.75rem 0.9rem;
-        color: var(--muted);
-        margin-bottom: 0.9rem;
+    @media (max-width: 1100px) {
+        .hero-grid {
+            grid-template-columns: 1fr;
+        }
     }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 SCENARIOS = {
     "Strait of Hormuz Closure": {
@@ -385,137 +536,44 @@ ROUTE_NODES = {
 }
 
 SEA_LANE_EDGES = [
-    ("Shanghai", "EastChinaSea"),
-    ("Shenzhen", "SouthChinaSea"),
-    ("Hong Kong", "SouthChinaSea"),
-    ("Busan", "SeaOfJapan"),
-    ("Kaohsiung", "TaiwanStrait"),
-    ("Tokyo", "EastChinaSea"),
-    ("Manila", "PhilippineSea"),
-    ("Jakarta", "JavaSea"),
-    ("Singapore", "Malacca"),
-    ("Mumbai", "ArabianSea"),
-    ("Chennai", "BayOfBengal"),
-    ("Dubai", "Hormuz"),
-    ("Dammam", "Hormuz"),
-    ("Jeddah", "RedSea"),
-    ("Rotterdam", "NorthSea"),
-    ("Hamburg", "NorthSea"),
-    ("Antwerp", "NorthSea"),
-    ("Valencia", "MediterraneanWest"),
-    ("Piraeus", "MediterraneanEast"),
-    ("London", "NorthSea"),
-    ("Los Angeles", "NorthPacificEast"),
-    ("Long Beach", "NorthPacificEast"),
-    ("Vancouver", "NorthPacificEast"),
-    ("Houston", "PanamaCanal"),
-    ("New York", "NorthAtlantic"),
-    ("Savannah", "NorthAtlantic"),
-    ("Panama City", "PanamaCanal"),
-    ("Santos", "SouthAtlantic"),
-    ("Callao", "SouthPacificMid"),
-    ("Buenos Aires", "SouthAtlantic"),
-    ("Durban", "CapeOfGoodHope"),
-    ("Cape Town", "CapeOfGoodHope"),
-    ("Mombasa", "EastAfrica"),
-    ("Lagos", "WestAfrica"),
-    ("Sydney", "TasmanSea"),
-    ("Melbourne", "TasmanSea"),
-
-    ("SeaOfJapan", "EastChinaSea"),
-    ("EastChinaSea", "TaiwanStrait"),
-    ("EastChinaSea", "NorthPacificWest"),
-    ("TaiwanStrait", "SouthChinaSea"),
-    ("TaiwanStrait", "PhilippineSea"),
-    ("SouthChinaSea", "Malacca"),
-    ("SouthChinaSea", "PhilippineSea"),
-    ("PhilippineSea", "NorthPacificWest"),
-    ("NorthPacificWest", "PacificMid"),
-    ("NorthPacificEast", "PacificMid"),
-    ("PacificMid", "NorthPacificEast"),
-
-    ("JavaSea", "Malacca"),
-    ("JavaSea", "TimorSea"),
-    ("TimorSea", "IndianOceanEast"),
-    ("TasmanSea", "SouthPacificMid"),
-
-    ("Malacca", "IndianOceanEast"),
-    ("BayOfBengal", "Malacca"),
-    ("BayOfBengal", "IndianOceanMid"),
-    ("IndianOceanEast", "IndianOceanMid"),
-    ("IndianOceanMid", "ArabianSea"),
-    ("IndianOceanMid", "CapeOfGoodHope"),
-    ("ArabianSea", "Hormuz"),
-    ("ArabianSea", "GulfOfAden"),
-    ("EastAfrica", "GulfOfAden"),
-    ("EastAfrica", "CapeOfGoodHope"),
-    ("GulfOfAden", "RedSea"),
-    ("RedSea", "Suez"),
-    ("Suez", "MediterraneanEast"),
-    ("MediterraneanEast", "MediterraneanCentral"),
-    ("MediterraneanCentral", "MediterraneanWest"),
-    ("MediterraneanWest", "Gibraltar"),
-    ("Gibraltar", "NorthSea"),
-    ("Gibraltar", "NorthAtlantic"),
-    ("Gibraltar", "WestAfrica"),
-    ("WestAfrica", "SouthAtlantic"),
-    ("CapeOfGoodHope", "SouthAtlantic"),
-    ("SouthAtlantic", "NorthAtlantic"),
-    ("SouthAtlantic", "PanamaCanal"),
-    ("PanamaCanal", "SouthPacificMid"),
-    ("PanamaCanal", "NorthPacificEast"),
+    ("Shanghai", "EastChinaSea"), ("Shenzhen", "SouthChinaSea"), ("Hong Kong", "SouthChinaSea"),
+    ("Busan", "SeaOfJapan"), ("Kaohsiung", "TaiwanStrait"), ("Tokyo", "EastChinaSea"),
+    ("Manila", "PhilippineSea"), ("Jakarta", "JavaSea"), ("Singapore", "Malacca"),
+    ("Mumbai", "ArabianSea"), ("Chennai", "BayOfBengal"), ("Dubai", "Hormuz"),
+    ("Dammam", "Hormuz"), ("Jeddah", "RedSea"), ("Rotterdam", "NorthSea"),
+    ("Hamburg", "NorthSea"), ("Antwerp", "NorthSea"), ("Valencia", "MediterraneanWest"),
+    ("Piraeus", "MediterraneanEast"), ("London", "NorthSea"), ("Los Angeles", "NorthPacificEast"),
+    ("Long Beach", "NorthPacificEast"), ("Vancouver", "NorthPacificEast"), ("Houston", "PanamaCanal"),
+    ("New York", "NorthAtlantic"), ("Savannah", "NorthAtlantic"), ("Panama City", "PanamaCanal"),
+    ("Santos", "SouthAtlantic"), ("Callao", "SouthPacificMid"), ("Buenos Aires", "SouthAtlantic"),
+    ("Durban", "CapeOfGoodHope"), ("Cape Town", "CapeOfGoodHope"), ("Mombasa", "EastAfrica"),
+    ("Lagos", "WestAfrica"), ("Sydney", "TasmanSea"), ("Melbourne", "TasmanSea"),
+    ("SeaOfJapan", "EastChinaSea"), ("EastChinaSea", "TaiwanStrait"), ("EastChinaSea", "NorthPacificWest"),
+    ("TaiwanStrait", "SouthChinaSea"), ("TaiwanStrait", "PhilippineSea"), ("SouthChinaSea", "Malacca"),
+    ("SouthChinaSea", "PhilippineSea"), ("PhilippineSea", "NorthPacificWest"), ("NorthPacificWest", "PacificMid"),
+    ("NorthPacificEast", "PacificMid"), ("PacificMid", "NorthPacificEast"), ("JavaSea", "Malacca"),
+    ("JavaSea", "TimorSea"), ("TimorSea", "IndianOceanEast"), ("TasmanSea", "SouthPacificMid"),
+    ("Malacca", "IndianOceanEast"), ("BayOfBengal", "Malacca"), ("BayOfBengal", "IndianOceanMid"),
+    ("IndianOceanEast", "IndianOceanMid"), ("IndianOceanMid", "ArabianSea"), ("IndianOceanMid", "CapeOfGoodHope"),
+    ("ArabianSea", "Hormuz"), ("ArabianSea", "GulfOfAden"), ("EastAfrica", "GulfOfAden"),
+    ("EastAfrica", "CapeOfGoodHope"), ("GulfOfAden", "RedSea"), ("RedSea", "Suez"),
+    ("Suez", "MediterraneanEast"), ("MediterraneanEast", "MediterraneanCentral"),
+    ("MediterraneanCentral", "MediterraneanWest"), ("MediterraneanWest", "Gibraltar"),
+    ("Gibraltar", "NorthSea"), ("Gibraltar", "NorthAtlantic"), ("Gibraltar", "WestAfrica"),
+    ("WestAfrica", "SouthAtlantic"), ("CapeOfGoodHope", "SouthAtlantic"), ("SouthAtlantic", "NorthAtlantic"),
+    ("SouthAtlantic", "PanamaCanal"), ("PanamaCanal", "SouthPacificMid"), ("PanamaCanal", "NorthPacificEast"),
     ("NorthAtlantic", "NorthSea"),
 ]
 
 SCENARIO_ZONES = {
-    "Strait of Hormuz Closure": {
-        "center": [56.25, 26.5667],
-        "radius_km": 450,
-        "severity": "High",
-        "impact": "Oil, LNG, Middle East shipping",
-    },
-    "Red Sea Disruption": {
-        "center": [38.0, 20.0],
-        "radius_km": 900,
-        "severity": "High",
-        "impact": "Asia-Europe shipping",
-    },
-    "Suez Canal Blockage": {
-        "center": [32.5498, 29.9668],
-        "radius_km": 250,
-        "severity": "High",
-        "impact": "Europe-Asia maritime corridor",
-    },
-    "Panama Canal Restriction": {
-        "center": [-79.68, 9.08],
-        "radius_km": 250,
-        "severity": "High",
-        "impact": "Atlantic-Pacific flows",
-    },
-    "Taiwan Strait Tension": {
-        "center": [119.5, 24.0],
-        "radius_km": 500,
-        "severity": "High",
-        "impact": "Semiconductor and East Asia shipping",
-    },
-    "Cape Diversion Pressure": {
-        "center": [18.5, -34.0],
-        "radius_km": 500,
-        "severity": "Medium",
-        "impact": "Long-route diversion stress",
-    },
-    "South China Sea Tension": {
-        "center": [114.0, 12.0],
-        "radius_km": 800,
-        "severity": "High",
-        "impact": "Asia intra-regional trade and electronics flows",
-    },
-    "North Pacific Storm Corridor": {
-        "center": [-160.0, 25.0],
-        "radius_km": 1200,
-        "severity": "Medium",
-        "impact": "Trans-Pacific shipping delays",
-    },
+    "Strait of Hormuz Closure": {"center": [56.25, 26.5667], "radius_km": 450, "severity": "High", "impact": "Oil, LNG, Middle East shipping"},
+    "Red Sea Disruption": {"center": [38.0, 20.0], "radius_km": 900, "severity": "High", "impact": "Asia-Europe shipping"},
+    "Suez Canal Blockage": {"center": [32.5498, 29.9668], "radius_km": 250, "severity": "High", "impact": "Europe-Asia maritime corridor"},
+    "Panama Canal Restriction": {"center": [-79.68, 9.08], "radius_km": 250, "severity": "High", "impact": "Atlantic-Pacific flows"},
+    "Taiwan Strait Tension": {"center": [119.5, 24.0], "radius_km": 500, "severity": "High", "impact": "Semiconductor and East Asia shipping"},
+    "Cape Diversion Pressure": {"center": [18.5, -34.0], "radius_km": 500, "severity": "Medium", "impact": "Long-route diversion stress"},
+    "South China Sea Tension": {"center": [114.0, 12.0], "radius_km": 800, "severity": "High", "impact": "Asia intra-regional trade and electronics flows"},
+    "North Pacific Storm Corridor": {"center": [-160.0, 25.0], "radius_km": 1200, "severity": "Medium", "impact": "Trans-Pacific shipping delays"},
 }
 
 
@@ -526,10 +584,7 @@ def get_live_events() -> pd.DataFrame:
 
 @st.cache_data(ttl=900, show_spinner=False)
 def cached_ai_risk_commentary(events_summary_json: str, bom_summary_json: str):
-    return generate_ai_risk_commentary(
-        json.loads(events_summary_json),
-        json.loads(bom_summary_json),
-    )
+    return generate_ai_risk_commentary(json.loads(events_summary_json), json.loads(bom_summary_json))
 
 
 @st.cache_data(ttl=900, show_spinner=False)
@@ -545,9 +600,7 @@ def cached_ai_scenario_commentary(scenario_context_json: str):
 def apply_scenario(events_df: pd.DataFrame, selected_scenario: str) -> pd.DataFrame:
     if selected_scenario == "None":
         return events_df
-
     scenario = SCENARIOS[selected_scenario]
-
     synthetic = pd.DataFrame([
         {
             "event_type": scenario["event_type"],
@@ -563,11 +616,7 @@ def apply_scenario(events_df: pd.DataFrame, selected_scenario: str) -> pd.DataFr
             "url": "",
         }
     ])
-
-    if events_df.empty:
-        return synthetic
-
-    return pd.concat([events_df, synthetic], ignore_index=True)
+    return synthetic if events_df.empty else pd.concat([events_df, synthetic], ignore_index=True)
 
 
 def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
@@ -576,29 +625,25 @@ def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
     def pick_color(row):
         event_type = row.get("event_type", "")
         severity = row.get("severity", "")
-
         if event_type == "Conflict":
             return [220, 38, 38, 210]
         if event_type == "Sanctions":
-            return [249, 115, 22, 210]
+            return [217, 119, 6, 210]
         if event_type == "Shipping Disruption":
-            return [245, 158, 11, 210]
-        if event_type == "Scenario":
-            return [99, 102, 241, 210]
-
+            return [37, 99, 235, 210]
         if severity == "High":
-            return [220, 38, 38, 180]
+            return [220, 38, 38, 185]
         if severity == "Medium":
-            return [245, 158, 11, 180]
-        return [34, 197, 94, 180]
+            return [217, 119, 6, 185]
+        return [22, 163, 74, 185]
 
     def pick_radius(row):
         severity = row.get("severity", "")
         if severity == "High":
-            return 140000
+            return 150000
         if severity == "Medium":
-            return 90000
-        return 60000
+            return 100000
+        return 70000
 
     df["color"] = df.apply(pick_color, axis=1)
     df["radius"] = df.apply(pick_radius, axis=1)
@@ -612,45 +657,30 @@ def render_event_map(events_df: pd.DataFrame):
 
     map_df = add_map_styles(events_df)
 
-    layer = pdk.Layer(
-        "ScatterplotLayer",
-        data=map_df,
-        get_position='[longitude, latitude]',
-        get_fill_color="color",
-        get_radius="radius",
-        pickable=True,
-        opacity=0.8,
-        stroked=True,
-        filled=True,
-        radius_min_pixels=8,
-        radius_max_pixels=40,
-        line_width_min_pixels=1,
-    )
-
-    view_state = pdk.ViewState(
-        latitude=20,
-        longitude=0,
-        zoom=1.1,
-        pitch=0,
-    )
-
-    tooltip = {
-        "html": """
-        <b>Event:</b> {title}<br/>
-        <b>Type:</b> {event_type}<br/>
-        <b>Country:</b> {country}<br/>
-        <b>Commodity:</b> {commodity}<br/>
-        <b>Severity:</b> {severity}<br/>
-        <b>Source:</b> {source}<br/>
-        <b>Time:</b> {event_time}
-        """,
-        "style": {"backgroundColor": "black", "color": "white"},
-    }
+    layers = [
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=map_df,
+            get_position='[longitude, latitude]',
+            get_fill_color="color",
+            get_radius="radius",
+            pickable=True,
+            opacity=0.82,
+            stroked=True,
+            filled=True,
+            radius_min_pixels=7,
+            radius_max_pixels=34,
+            line_width_min_pixels=1,
+        )
+    ]
 
     deck = pdk.Deck(
-        layers=[layer],
-        initial_view_state=view_state,
-        tooltip=tooltip,
+        layers=layers,
+        initial_view_state=pdk.ViewState(latitude=20, longitude=0, zoom=1.12, pitch=0),
+        tooltip={
+            "html": "<b>{title}</b><br/>{event_type} · {severity}<br/>{country}<br/>Commodity: {commodity}<br/>Source: {source}",
+            "style": {"backgroundColor": "#0f172a", "color": "white", "borderRadius": "12px"},
+        },
         map_style="light",
     )
 
@@ -665,53 +695,24 @@ def render_timeline(events_df: pd.DataFrame):
     df = events_df.copy()
     df["event_time"] = pd.to_datetime(df["event_time"], errors="coerce", utc=True)
     df = df.dropna(subset=["event_time"])
-
     if df.empty:
         st.info("No valid event times available.")
         return
 
     df["hour_bucket"] = df["event_time"].dt.floor("h")
     timeline = df.groupby("hour_bucket").size().reset_index(name="event_count")
-
-    if timeline.empty:
-        st.info("No timeline data available.")
-        return
-
-    st.line_chart(timeline.set_index("hour_bucket"))
+    st.line_chart(timeline.set_index("hour_bucket"), use_container_width=True)
 
 
 REGION_MAP = {
-    "China": "Asia",
-    "Taiwan": "Asia",
-    "Japan": "Asia",
-    "India": "Asia",
-    "South Korea": "Asia",
-    "Singapore": "Asia",
-    "Vietnam": "Asia",
-    "Philippines": "Asia",
-    "Indonesia": "Asia",
-    "Iran": "Middle East",
-    "Israel": "Middle East",
-    "Egypt": "Middle East",
-    "Yemen": "Middle East",
-    "Saudi Arabia": "Middle East",
-    "UAE": "Middle East",
-    "Ukraine": "Europe",
-    "Russia": "Europe",
-    "Germany": "Europe",
-    "Netherlands": "Europe",
-    "Belgium": "Europe",
-    "Chile": "South America",
-    "Brazil": "South America",
-    "Peru": "South America",
-    "Argentina": "South America",
-    "United States": "North America",
-    "Canada": "North America",
-    "Mexico": "North America",
-    "South Africa": "Africa",
-    "Kenya": "Africa",
-    "Nigeria": "Africa",
-    "Australia": "Oceania",
+    "China": "Asia", "Taiwan": "Asia", "Japan": "Asia", "India": "Asia", "South Korea": "Asia",
+    "Singapore": "Asia", "Vietnam": "Asia", "Philippines": "Asia", "Indonesia": "Asia",
+    "Iran": "Middle East", "Israel": "Middle East", "Egypt": "Middle East", "Yemen": "Middle East",
+    "Saudi Arabia": "Middle East", "UAE": "Middle East", "Ukraine": "Europe", "Russia": "Europe",
+    "Germany": "Europe", "Netherlands": "Europe", "Belgium": "Europe", "Chile": "South America",
+    "Brazil": "South America", "Peru": "South America", "Argentina": "South America",
+    "United States": "North America", "Canada": "North America", "Mexico": "North America",
+    "South Africa": "Africa", "Kenya": "Africa", "Nigeria": "Africa", "Australia": "Oceania",
 }
 
 
@@ -725,14 +726,10 @@ def render_regional_summary(events_df: pd.DataFrame):
     if events_df.empty:
         st.info("No regional data available.")
         return
-
     df = add_region(events_df)
     summary = (
         df.groupby("region")
-        .agg(
-            live_events=("title", "count"),
-            countries=("country", "nunique")
-        )
+        .agg(live_events=("title", "count"), countries=("country", "nunique"))
         .reset_index()
         .sort_values("live_events", ascending=False)
     )
@@ -743,12 +740,7 @@ def haversine_km(lon1, lat1, lon2, lat2):
     r = 6371.0
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(dlon / 2) ** 2
-    )
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
     return 2 * r * math.asin(math.sqrt(a))
 
 
@@ -766,7 +758,6 @@ def build_graph():
         lon1, lat1 = get_node_coord(a)
         lon2, lat2 = get_node_coord(b)
         dist = haversine_km(lon1, lat1, lon2, lat2)
-
         graph.setdefault(a, []).append((b, dist))
         graph.setdefault(b, []).append((a, dist))
     return graph
@@ -775,60 +766,44 @@ def build_graph():
 def shortest_path(graph, start, end):
     pq = [(0, start, [])]
     visited = set()
-
     while pq:
         cost, node, path = heapq.heappop(pq)
-
         if node in visited:
             continue
         visited.add(node)
         path = path + [node]
-
         if node == end:
             return path, cost
-
         for neighbor, weight in graph.get(node, []):
             if neighbor not in visited:
                 heapq.heappush(pq, (cost + weight, neighbor, path))
-
     return None, None
 
 
 def nodes_to_path(node_path):
-    coords = []
-    for node in node_path:
-        lon, lat = get_node_coord(node)
-        coords.append([lon, lat])
-    return coords
+    return [[get_node_coord(node)[0], get_node_coord(node)[1]] for node in node_path]
 
 
 def build_dynamic_route(start_port, end_port):
     graph = build_graph()
     node_path, total_distance = shortest_path(graph, start_port, end_port)
-
     if not node_path:
         return None, None, None
-
-    route_points = nodes_to_path(node_path)
-    return node_path, route_points, total_distance
+    return node_path, nodes_to_path(node_path), total_distance
 
 
 def route_impacted(route_points, scenario):
     center_lon, center_lat = scenario["center"]
     radius_km = scenario["radius_km"]
-
-    for lon, lat in route_points:
-        if haversine_km(lon, lat, center_lon, center_lat) <= radius_km:
-            return True
-    return False
+    return any(haversine_km(lon, lat, center_lon, center_lat) <= radius_km for lon, lat in route_points)
 
 
 def build_route_df(route_points, impacted=False, reroute=False):
     return pd.DataFrame([
         {
-            "name": "Rerouted Route" if reroute else "Simulated Route",
+            "name": "Rerouted Route" if reroute else "Primary Route",
             "path": route_points,
-            "color": [168, 85, 247] if reroute else ([220, 38, 38] if impacted else [37, 99, 235]),
+            "color": [124, 58, 237] if reroute else ([220, 38, 38] if impacted else [15, 23, 42]),
         }
     ])
 
@@ -841,7 +816,7 @@ def build_scenario_df(selected_route_scenario):
             "longitude": zone["center"][0],
             "latitude": zone["center"][1],
             "radius": zone["radius_km"] * 1000,
-            "color": [245, 158, 11, 120],
+            "color": [217, 119, 6, 110],
             "impact": zone["impact"],
             "severity": zone["severity"],
         }
@@ -850,24 +825,13 @@ def build_scenario_df(selected_route_scenario):
 
 def build_port_points_df(start_port, end_port):
     return pd.DataFrame([
-        {
-            "name": start_port,
-            "longitude": PORTS[start_port]["lon"],
-            "latitude": PORTS[start_port]["lat"],
-            "impact": "Route origin",
-        },
-        {
-            "name": end_port,
-            "longitude": PORTS[end_port]["lon"],
-            "latitude": PORTS[end_port]["lat"],
-            "impact": "Route destination",
-        },
+        {"name": start_port, "longitude": PORTS[start_port]["lon"], "latitude": PORTS[start_port]["lat"], "impact": "Origin"},
+        {"name": end_port, "longitude": PORTS[end_port]["lon"], "latitude": PORTS[end_port]["lat"], "impact": "Destination"},
     ])
 
 
 def render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df=None):
     layers = []
-
     if not scenario_df.empty:
         layers.append(
             pdk.Layer(
@@ -877,10 +841,9 @@ def render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df=None)
                 get_fill_color="color",
                 get_radius="radius",
                 pickable=True,
-                opacity=0.35,
+                opacity=0.32,
             )
         )
-
     layers.append(
         pdk.Layer(
             "PathLayer",
@@ -892,7 +855,6 @@ def render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df=None)
             pickable=True,
         )
     )
-
     if reroute_df is not None and not reroute_df.empty:
         layers.append(
             pdk.Layer(
@@ -905,35 +867,28 @@ def render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df=None)
                 pickable=True,
             )
         )
-
     layers.append(
         pdk.Layer(
             "ScatterplotLayer",
             data=ports_df,
             get_position='[longitude, latitude]',
-            get_fill_color=[34, 197, 94, 220],
-            get_radius=90000,
+            get_fill_color=[22, 163, 74, 220],
+            get_radius=85000,
             pickable=True,
         )
     )
-
     deck = pdk.Deck(
         layers=layers,
-        initial_view_state=pdk.ViewState(latitude=20, longitude=20, zoom=1.4),
+        initial_view_state=pdk.ViewState(latitude=20, longitude=18, zoom=1.35),
         map_style="light",
-        tooltip={
-            "html": "<b>{name}</b><br/>{impact}",
-            "style": {"backgroundColor": "black", "color": "white"},
-        },
+        tooltip={"html": "<b>{name}</b><br/>{impact}", "style": {"backgroundColor": "#0f172a", "color": "white"}},
     )
-
     st.pydeck_chart(deck, use_container_width=True)
 
 
 def estimate_delay_days(selected_route_scenario, impacted):
     if not impacted or selected_route_scenario == "None":
         return 0
-
     delay_map = {
         "Strait of Hormuz Closure": "7–21 days",
         "Red Sea Disruption": "7–18 days",
@@ -950,7 +905,6 @@ def estimate_delay_days(selected_route_scenario, impacted):
 def get_reroute_points(start_port, end_port, selected_route_scenario):
     start = [PORTS[start_port]["lon"], PORTS[start_port]["lat"]]
     end = [PORTS[end_port]["lon"], PORTS[end_port]["lat"]]
-
     reroute_templates = {
         "Suez Canal Blockage": [start, [103.8519, 1.2903], [18.5, -34.0], end],
         "Red Sea Disruption": [start, [103.8519, 1.2903], [18.5, -34.0], end],
@@ -959,358 +913,348 @@ def get_reroute_points(start_port, end_port, selected_route_scenario):
         "South China Sea Tension": [start, [135.0, 18.0], [95.0, 8.0], end],
         "North Pacific Storm Corridor": [start, [10.0, 0.0], [140.0, -15.0], end],
     }
-
     return reroute_templates.get(selected_route_scenario)
 
 
 def render_priorities(filtered_risk_df: pd.DataFrame):
     if filtered_risk_df.empty:
         return
-
-    top_priority = filtered_risk_df.head(3)
-    st.markdown("### Immediate Priorities")
-
-    for _, row in top_priority.iterrows():
+    st.markdown('<div class="section-heading"><div class="section-title">Immediate priorities</div><div class="section-caption">Most exposed items needing attention now</div></div>', unsafe_allow_html=True)
+    for _, row in filtered_risk_df.head(3).iterrows():
         risk_class = str(row.get("risk_level", "Low")).lower()
-        risk_css = "risk-high" if risk_class == "high" else "risk-medium" if risk_class == "medium" else "risk-low"
-
+        css = "high" if risk_class == "high" else "medium" if risk_class == "medium" else "low"
         st.markdown(
             f"""
-            <div class="insight-card {risk_css}">
-                <b>{row.get('part_name', 'Unknown Part')}</b><br>
-                Supplier Country: {row.get('supplier_country', 'Unknown')}<br>
-                Trigger: {row.get('matched_event', 'N/A')}<br>
-                Recommendation: {row.get('recommendation', 'Review sourcing options.')}
+            <div class="insight {css}">
+                <div class="insight-title">{row.get('part_name', 'Unknown Part')}</div>
+                <div class="muted">Supplier country: {row.get('supplier_country', 'Unknown')}</div>
+                <div style="margin-top:0.35rem;">Trigger: {row.get('matched_event', 'N/A')}</div>
+                <div style="margin-top:0.2rem;">Recommendation: {row.get('recommendation', 'Review sourcing options.')}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
 
-st.markdown("""
-<div class="hero-card">
-    <div class="hero-title">🌍 Supply Chain Risk Monitor</div>
-    <div class="hero-subtitle">
-        Monitor disruptions, assess BOM exposure, simulate route risk, and prioritize sourcing action.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="section-card">
-    <div style="font-weight:700; margin-bottom:0.35rem;">Workflow</div>
-    <div class="small-muted">
-        Monitor events → analyze BOM exposure → simulate route risk → act on sourcing decisions.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
+# Sidebar controls
 st.sidebar.markdown("## Control Center")
-st.sidebar.caption("Move from monitoring to action.")
+st.sidebar.caption("Live monitoring, sourcing exposure, and route resilience in one workspace.")
 
 events_df = get_live_events()
-
 if events_df.empty:
     st.warning("No live events were loaded. Check your event loaders and API/internet access.")
 
 event_type_options = sorted(events_df["event_type"].dropna().unique().tolist()) if not events_df.empty else []
 severity_options = sorted(events_df["severity"].dropna().unique().tolist()) if not events_df.empty else []
 
-with st.sidebar.expander("1️⃣ Event Monitoring", expanded=True):
-    selected_scenario = st.selectbox(
-        "Scenario Simulator",
-        options=["None"] + list(SCENARIOS.keys())
-    )
+with st.sidebar.expander("Live updates", expanded=True):
+    selected_scenario = st.selectbox("Scenario overlay", options=["None"] + list(SCENARIOS.keys()))
+    selected_event_types = st.multiselect("Event type", options=event_type_options, default=event_type_options)
+    selected_severity = st.multiselect("Severity", options=severity_options, default=severity_options)
 
-    selected_event_types = st.multiselect(
-        "Filter by Event Type",
-        options=event_type_options,
-        default=event_type_options
-    )
+with st.sidebar.expander("BOM upload", expanded=True):
+    uploaded_file = st.file_uploader("Upload BOM", type=["csv", "xlsx", "xls"])
+    selected_risk_levels = st.multiselect("Risk level", options=["High", "Medium", "Low"], default=["High", "Medium", "Low"])
 
-    selected_severity = st.multiselect(
-        "Filter by Severity",
-        options=severity_options,
-        default=severity_options
-    )
-
-with st.sidebar.expander("2️⃣ BOM Analysis", expanded=True):
-    uploaded_file = st.file_uploader(
-        "Upload BOM file",
-        type=["csv", "xlsx", "xls"]
-    )
-
-    selected_risk_levels = st.multiselect(
-        "Filter by Risk Level",
-        options=["High", "Medium", "Low"],
-        default=["High", "Medium", "Low"]
-    )
-
-with st.sidebar.expander("3️⃣ Route Simulation", expanded=False):
-    simulator_mode = st.checkbox("Enable Route Simulator", value=False)
-
+with st.sidebar.expander("Route simulation", expanded=False):
+    simulator_mode = st.checkbox("Enable route simulation", value=False)
     start_port = None
     end_port = None
     selected_route_scenario = "None"
-
     if simulator_mode:
         port_names = sorted(PORTS.keys())
-        start_port = st.selectbox("Start Port", port_names, index=0, key="route_start_port")
-        end_port = st.selectbox("End Port", port_names, index=1, key="route_end_port")
-        selected_route_scenario = st.selectbox(
-            "Route Scenario",
-            ["None"] + list(SCENARIO_ZONES.keys()),
-            key="route_scenario"
-        )
+        start_port = st.selectbox("Start port", port_names, index=0, key="route_start_port")
+        end_port = st.selectbox("End port", port_names, index=1, key="route_end_port")
+        selected_route_scenario = st.selectbox("Scenario", ["None"] + list(SCENARIO_ZONES.keys()), key="route_scenario")
 
 st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Live Events", use_container_width=True):
+if st.sidebar.button("Refresh live events", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
+
+# Data preparation
 if not events_df.empty:
     filtered_events = events_df[
-        events_df["event_type"].isin(selected_event_types) &
-        events_df["severity"].isin(selected_severity)
+        events_df["event_type"].isin(selected_event_types) & events_df["severity"].isin(selected_severity)
     ].copy()
 else:
     filtered_events = pd.DataFrame()
 
 filtered_events = apply_scenario(filtered_events, selected_scenario)
 
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
-st.markdown("### Executive Summary")
+live_count = len(filtered_events)
+high_count = int((filtered_events["severity"] == "High").sum()) if not filtered_events.empty else 0
+country_count = filtered_events["country"].nunique() if not filtered_events.empty else 0
+commodity_count = filtered_events["commodity"].nunique() if not filtered_events.empty else 0
+source_count = filtered_events["source"].nunique() if not filtered_events.empty else 0
 
-col1, col2, col3, col4, col5 = st.columns(5)
-col1.metric("Live Events", len(filtered_events))
-col2.metric("High Severity Events", int((filtered_events["severity"] == "High").sum()) if not filtered_events.empty else 0)
-col3.metric("Countries Affected", filtered_events["country"].nunique() if not filtered_events.empty else 0)
-col4.metric("Tracked Commodities", filtered_events["commodity"].nunique() if not filtered_events.empty else 0)
-col5.metric("Live Feed Sources", filtered_events["source"].nunique() if not filtered_events.empty else 0)
 
-st.markdown("""
-<div style="margin-top:0.7rem;">
-    <span class="pill pill-red">🟥 High Risk / Conflict</span>
-    <span class="pill pill-amber">🟨 Medium Risk / Shipping / Sanctions</span>
-    <span class="pill pill-green">🟩 Low Risk / General</span>
-</div>
-""", unsafe_allow_html=True)
+# Hero / landing section
+st.markdown(
+    f"""
+    <div class="top-shell">
+        <div class="hero">
+            <div class="hero-grid">
+                <div>
+                    <div class="eyebrow">Executive risk intelligence</div>
+                    <div class="hero-title">See disruption exposure before it becomes an operations problem.</div>
+                    <div class="hero-subtitle">
+                        A decision-grade command center for live event monitoring, supplier exposure analysis,
+                        and route-level disruption simulation. Built for fast executive review and action.
+                    </div>
+                </div>
+                <div class="hero-kicker">
+                    <div class="hero-mini">
+                        <div class="hero-mini-label">Live events</div>
+                        <div class="hero-mini-value">{live_count}</div>
+                    </div>
+                    <div class="hero-mini">
+                        <div class="hero-mini-label">High severity</div>
+                        <div class="hero-mini-value">{high_count}</div>
+                    </div>
+                    <div class="hero-mini">
+                        <div class="hero-mini-label">Countries affected</div>
+                        <div class="hero-mini-value">{country_count}</div>
+                    </div>
+                    <div class="hero-mini">
+                        <div class="hero-mini-label">Tracked commodities</div>
+                        <div class="hero-mini-value">{commodity_count}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+left, right = st.columns([1.45, 0.92], gap="large")
+
+with left:
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><div><div class="section-title">Global risk map</div><div class="section-caption">Live disruption clusters with severity-weighted markers</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    render_event_map(filtered_events)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with right:
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><div><div class="section-title">Live updates</div><div class="section-caption">Current market and supply risk footprint</div></div></div>',
+        unsafe_allow_html=True,
+    )
+
+    k1, k2 = st.columns(2)
+    with k1:
+        st.metric("Sources", source_count)
+    with k2:
+        st.metric("Scenario", selected_scenario if selected_scenario != "None" else "Base")
+
+    st.markdown(
+        """
+        <div class="pill-row">
+            <span class="pill high">High risk / conflict</span>
+            <span class="pill medium">Shipping / sanctions</span>
+            <span class="pill low">Low risk / general</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if not filtered_events.empty:
+        preview_cols = [c for c in ["title", "event_type", "country", "severity", "source"] if c in filtered_events.columns]
+        preview_df = filtered_events[preview_cols].head(8)
+        st.dataframe(preview_df, use_container_width=True, hide_index=True)
+    else:
+        st.info("No live events match the current filters.")
+
+    st.markdown(
+        """
+        <div class="note-strip">
+            <div>Use the left sidebar to change event filters, upload a BOM, and test route resilience scenarios.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+# Executive metrics
+st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-heading"><div><div class="section-title">Executive snapshot</div><div class="section-caption">High-level monitoring metrics for leadership review</div></div></div>',
+    unsafe_allow_html=True,
+)
+mc1, mc2, mc3, mc4, mc5 = st.columns(5)
+mc1.metric("Live Events", live_count)
+mc2.metric("High Severity", high_count)
+mc3.metric("Countries", country_count)
+mc4.metric("Commodities", commodity_count)
+mc5.metric("Sources", source_count)
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 ai_commentary = None
 risk_df = pd.DataFrame()
 filtered_risk_df = pd.DataFrame()
 
 events_summary = {
-    "live_events": int(len(filtered_events)),
-    "high_severity_events": int((filtered_events["severity"] == "High").sum()) if not filtered_events.empty else 0,
+    "live_events": int(live_count),
+    "high_severity_events": int(high_count),
     "top_countries": filtered_events["country"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
     "top_commodities": filtered_events["commodity"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
     "top_event_types": filtered_events["event_type"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
     "selected_scenario": selected_scenario,
 }
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Live Events",
-    "Risk Map",
-    "Trends",
-    "BOM Analysis"
-])
+tab1, tab2, tab3, tab4 = st.tabs(["Live feed", "Trend view", "BOM exposure", "Route intelligence"])
 
 with tab1:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("Live Global Events")
-
-    event_display_cols = [
-        "event_type", "title", "country", "commodity", "severity", "source", "event_time"
-    ]
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><div><div class="section-title">Event stream</div><div class="section-caption">Filtered live incidents and source mix</div></div></div>', unsafe_allow_html=True)
+    event_display_cols = ["event_type", "title", "country", "commodity", "severity", "source", "event_time"]
     existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
-
     if not filtered_events.empty and existing_cols:
         st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
-
-        source_summary = (
-            filtered_events.groupby("source")
-            .size()
-            .reset_index(name="event_count")
-            .sort_values("event_count", ascending=False)
-        )
-
-        st.markdown("#### Event Source Mix")
+        source_summary = filtered_events.groupby("source").size().reset_index(name="event_count").sort_values("event_count", ascending=False)
+        st.markdown("#### Source distribution")
         st.dataframe(source_summary, use_container_width=True, hide_index=True)
-
-        if "url" in filtered_events.columns:
-            with st.expander("Top Source Links"):
-                shown = 0
-                for _, row in filtered_events.iterrows():
-                    if pd.notna(row.get("url")) and row.get("url"):
-                        st.markdown(f"- [{row['title']}]({row['url']})")
-                        shown += 1
-                    if shown >= 10:
-                        break
     else:
-        st.info("No events match the current filters. Try broadening event type or severity filters.")
-
+        st.info("No events match the active filters.")
     st.markdown("</div>", unsafe_allow_html=True)
 
 with tab2:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("Live Risk Map")
-    render_event_map(filtered_events)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with tab3:
-    trend_col, region_col = st.columns([1.2, 1])
-
-    with trend_col:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown("#### Timeline View")
+    c1, c2 = st.columns([1.15, 0.85], gap="large")
+    with c1:
+        st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+        st.markdown('<div class="section-heading"><div><div class="section-title">Timeline</div><div class="section-caption">Velocity of event flow over time</div></div></div>', unsafe_allow_html=True)
         render_timeline(filtered_events)
         st.markdown("</div>", unsafe_allow_html=True)
-
-    with region_col:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown("#### Regional Summary")
+    with c2:
+        st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+        st.markdown('<div class="section-heading"><div><div class="section-title">Regional distribution</div><div class="section-caption">Where current disruption is concentrated</div></div></div>', unsafe_allow_html=True)
         render_regional_summary(filtered_events)
         st.markdown("</div>", unsafe_allow_html=True)
 
-with tab4:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("BOM Risk Analysis")
-    st.caption("Upload a BOM to identify exposed parts, understand why they are at risk, and export decision-ready results.")
+with tab3:
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><div><div class="section-title">BOM exposure analysis</div><div class="section-caption">Upload a BOM to assess supplier and commodity risk</div></div></div>', unsafe_allow_html=True)
 
     if uploaded_file is not None:
         try:
             raw_bom_df = load_bom(uploaded_file)
             is_valid, missing_columns = validate_bom(raw_bom_df)
-
             if not is_valid:
                 st.error("Missing required BOM columns: " + ", ".join(missing_columns))
-                st.markdown("#### Required Minimum Columns")
                 st.code("part_name, supplier_country")
             else:
                 bom_df = clean_bom(raw_bom_df)
+                st.markdown('<div class="note-strip">BOM validated successfully. Review part exposure, priority actions, and export the result for sourcing decisions.</div>', unsafe_allow_html=True)
 
-                st.markdown('<div class="mini-note">Your BOM has been uploaded. Review the summary first, then focus on high-risk items and immediate priorities.</div>', unsafe_allow_html=True)
-
-                bom_col1, bom_col2 = st.columns([1.35, 1])
-                with bom_col1:
-                    st.success("BOM uploaded and validated successfully.")
+                b1, b2 = st.columns([1.25, 0.75], gap="large")
+                with b1:
                     st.dataframe(bom_df, use_container_width=True, hide_index=True)
-
-                with bom_col2:
-                    st.markdown("#### Uploaded BOM Summary")
-                    st.metric("Total Parts", len(bom_df))
-                    st.metric("Supplier Countries", bom_df["supplier_country"].nunique())
+                with b2:
+                    st.metric("Total parts", len(bom_df))
+                    st.metric("Supplier countries", bom_df["supplier_country"].nunique())
                     if "commodity" in bom_df.columns:
                         tracked = bom_df["commodity"].replace("", pd.NA).dropna().nunique()
-                        st.metric("Tracked BOM Commodities", tracked)
+                        st.metric("Tracked commodities", tracked)
 
                 risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
-
                 if not risk_df.empty:
                     risk_df = add_recommendations(risk_df, bom_df)
-
-                    filtered_risk_df = risk_df[
-                        risk_df["risk_level"].isin(selected_risk_levels)
-                    ].copy()
-
+                    filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
                     if not filtered_risk_df.empty:
                         risk_order = {"High": 0, "Medium": 1, "Low": 2}
                         filtered_risk_df["risk_order"] = filtered_risk_df["risk_level"].map(risk_order).fillna(99)
                         sort_cols = ["risk_order"]
                         ascending = [True]
-
                         if "risk_score" in filtered_risk_df.columns:
                             sort_cols.append("risk_score")
                             ascending.append(False)
-
                         filtered_risk_df = filtered_risk_df.sort_values(sort_cols, ascending=ascending).drop(columns=["risk_order"])
 
-                    rc1, rc2, rc3 = st.columns(3)
-                    rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
-                    rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
-                    rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
+                    r1, r2, r3 = st.columns(3)
+                    r1.metric("High risk parts", int((risk_df["risk_level"] == "High").sum()))
+                    r2.metric("Medium risk parts", int((risk_df["risk_level"] == "Medium").sum()))
+                    r3.metric("Low risk parts", int((risk_df["risk_level"] == "Low").sum()))
 
                     render_priorities(filtered_risk_df)
 
-                    st.subheader("Affected BOM Items")
-                    display_cols = [
-                        "part_number",
-                        "part_name",
-                        "commodity",
-                        "supplier_country",
-                        "matched_event",
-                        "event_type",
-                        "impacted_commodity",
-                        "rule_trigger",
-                        "risk_score",
-                        "risk_level",
-                    ]
+                    st.markdown("#### Affected BOM items")
+                    display_cols = ["part_number", "part_name", "commodity", "supplier_country", "matched_event", "event_type", "impacted_commodity", "rule_trigger", "risk_score", "risk_level"]
                     existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
-
                     if not filtered_risk_df.empty and existing_display_cols:
-                        st.dataframe(
-                            filtered_risk_df[existing_display_cols],
-                            use_container_width=True,
-                            hide_index=True
-                        )
+                        st.dataframe(filtered_risk_df[existing_display_cols], use_container_width=True, hide_index=True)
 
-                    st.subheader("Detailed Risk Explanation")
-                    explanation_cols = [
-                        "part_name",
-                        "supplier_name",
-                        "supplier_country",
-                        "matched_event",
-                        "risk_level",
-                        "rule_trigger",
-                        "inferred_commodities",
-                        "reason",
-                        "recommendation",
-                    ]
+                    st.markdown("#### Detailed risk explanation")
+                    explanation_cols = ["part_name", "supplier_name", "supplier_country", "matched_event", "risk_level", "rule_trigger", "inferred_commodities", "reason", "recommendation"]
                     explanation_cols = [col for col in explanation_cols if col in filtered_risk_df.columns]
-
                     if not filtered_risk_df.empty and explanation_cols:
-                        st.dataframe(
-                            filtered_risk_df[explanation_cols],
-                            use_container_width=True,
-                            hide_index=True
-                        )
+                        st.dataframe(filtered_risk_df[explanation_cols], use_container_width=True, hide_index=True)
 
                     csv_export = filtered_risk_df.to_csv(index=False).encode("utf-8")
-                    st.download_button(
-                        label="Download Risk Analysis Results",
-                        data=csv_export,
-                        file_name="risk_analysis_results.csv",
-                        mime="text/csv"
-                    )
+                    st.download_button("Download risk analysis", csv_export, "risk_analysis_results.csv", "text/csv")
                 else:
-                    st.info("No BOM items are directly affected right now. Current exposure appears limited under the selected filters.")
-
+                    st.info("No BOM items are directly affected under the current filters.")
         except Exception as e:
             st.error(f"Error reading file: {e}")
-
     else:
-        st.markdown("""
-        <div class="insight-card">
-            <b>Get started:</b> Upload your BOM from the sidebar to compare supplier locations
-            and commodities against live disruption events.
-        </div>
-        """, unsafe_allow_html=True)
-
         sample_bom = get_bom_template()
-        st.markdown("#### Sample BOM Format")
+        st.info("Upload a BOM from the sidebar to run exposure analysis.")
         st.dataframe(sample_bom, use_container_width=True, hide_index=True)
-
         csv_data = sample_bom.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="Download Sample BOM Template",
-            data=csv_data,
-            file_name="sample_bom_template.csv",
-            mime="text/csv"
-        )
+        st.download_button("Download sample BOM template", csv_data, "sample_bom_template.csv", "text/csv")
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+with tab4:
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><div><div class="section-title">Route intelligence</div><div class="section-caption">Maritime path simulation with disruption overlays</div></div></div>', unsafe_allow_html=True)
+
+    if simulator_mode and start_port and end_port:
+        if start_port == end_port:
+            st.warning("Please select different start and end ports.")
+        else:
+            node_path, route_points, total_distance = build_dynamic_route(start_port, end_port)
+            if not route_points:
+                st.error("No route could be calculated for the selected ports.")
+            else:
+                impacted = False
+                scenario_df = pd.DataFrame()
+                reroute_df = pd.DataFrame()
+                if selected_route_scenario != "None":
+                    scenario = SCENARIO_ZONES[selected_route_scenario]
+                    impacted = route_impacted(route_points, scenario)
+                    scenario_df = build_scenario_df(selected_route_scenario)
+                    reroute_points = get_reroute_points(start_port, end_port, selected_route_scenario)
+                    if impacted and reroute_points:
+                        reroute_df = build_route_df(reroute_points, reroute=True)
+
+                route_df = build_route_df(route_points, impacted=impacted)
+                ports_df = build_port_points_df(start_port, end_port)
+                render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df if not reroute_df.empty else None)
+
+                s1, s2, s3 = st.columns(3)
+                s1.metric("Estimated distance", f"{total_distance:,.0f} km")
+                s2.metric("Scenario", selected_route_scenario)
+                s3.metric("Status", "Impacted" if impacted else "Clear")
+
+                st.code(" → ".join(node_path))
+                if selected_route_scenario != "None":
+                    delay = estimate_delay_days(selected_route_scenario, impacted)
+                    if impacted:
+                        st.error(f"This route is impacted by {selected_route_scenario}. Expected delay: {delay}")
+                    else:
+                        st.success("This route is not directly impacted by the selected scenario.")
+    else:
+        st.info("Enable route simulation from the sidebar to test global shipping paths.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 bom_summary = {}
 if not risk_df.empty:
@@ -1323,231 +1267,54 @@ if not risk_df.empty:
 
 try:
     if events_summary or bom_summary:
-        with st.spinner("Generating AI risk commentary..."):
-            ai_commentary = cached_ai_risk_commentary(
-                json.dumps(events_summary, sort_keys=True),
-                json.dumps(bom_summary, sort_keys=True),
-            )
+        with st.spinner("Generating AI commentary..."):
+            ai_commentary = cached_ai_risk_commentary(json.dumps(events_summary, sort_keys=True), json.dumps(bom_summary, sort_keys=True))
 except Exception as e:
     st.warning(f"AI commentary unavailable: {e}")
 
 if ai_commentary:
-    st.divider()
-    st.subheader("AI Risk Commentary")
-
+    st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><div><div class="section-title">AI commentary</div><div class="section-caption">Condensed decision support for leadership</div></div></div>', unsafe_allow_html=True)
     st.markdown(
         f"""
-        <div class="insight-card risk-high">
-            <b>Executive Summary</b><br>
-            {ai_commentary.get("executive_summary", "No commentary available.")}
+        <div class="insight high">
+            <div class="insight-title">Executive summary</div>
+            <div>{ai_commentary.get('executive_summary', 'No commentary available.')}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    a1, a2 = st.columns([1, 2])
+    a1, a2 = st.columns([0.7, 1.3], gap="large")
     with a1:
         st.metric("Urgency", ai_commentary.get("urgency", "Unknown"))
     with a2:
         st.markdown(
             f"""
-            <div class="section-card">
-                <b>Recommended Action</b><br>
-                {ai_commentary.get('recommended_action', 'No recommendation available.')}
+            <div class="insight medium">
+                <div class="insight-title">Recommended action</div>
+                <div>{ai_commentary.get('recommended_action', 'No recommendation available.')}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
+    if ai_commentary.get("top_risks"):
+        st.markdown("#### Top risks")
+        for item in ai_commentary.get("top_risks", []):
+            st.markdown(f'<div class="insight medium">{item}</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("#### Top Risks")
-    for item in ai_commentary.get("top_risks", []):
-        st.markdown(
-            f"""
-            <div class="insight-card risk-medium">
-                {item}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
-if not filtered_risk_df.empty:
-    st.divider()
-    st.subheader("AI Alternate Sourcing Prioritization")
-
-    part_options = filtered_risk_df["part_name"].dropna().astype(str).tolist()
-    if part_options:
-        selected_part = st.selectbox("Select impacted part", options=part_options)
-
-        selected_row = filtered_risk_df[filtered_risk_df["part_name"].astype(str) == selected_part].iloc[0]
-
-        part_context = {
-            "part_name": selected_row.get("part_name", ""),
-            "commodity": selected_row.get("commodity", ""),
-            "supplier_country": selected_row.get("supplier_country", ""),
-            "risk_level": selected_row.get("risk_level", ""),
-            "matched_event": selected_row.get("matched_event", ""),
-            "event_type": selected_row.get("event_type", ""),
-            "criticality": selected_row.get("criticality", ""),
-            "current_supplier": selected_row.get("supplier_name", ""),
-            "alternate_suppliers": [
-                {
-                    "supplier": selected_row.get("alternate_supplier", ""),
-                    "country": selected_row.get("alternate_supplier_country", ""),
-                }
-            ],
-        }
-
-        try:
-            with st.spinner("Ranking alternate suppliers with AI..."):
-                alt_result = cached_ai_alternate_sources(
-                    json.dumps(part_context, sort_keys=True)
-                )
-
-            st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.write(f"**Best option:** {alt_result.get('best_option', 'N/A')}")
-            for item in alt_result.get("ranking", []):
-                st.write(f"{item.get('rank', '-')}. {item.get('supplier', 'Unknown')} — Score: {item.get('score', 'N/A')}")
-                st.caption(item.get("reason", ""))
-            st.write(f"**Switch recommendation:** {alt_result.get('switch_recommendation', 'No recommendation available.')}")
-            st.markdown("</div>", unsafe_allow_html=True)
-        except Exception as e:
-            st.warning(f"AI alternate sourcing unavailable: {e}")
-
-if selected_scenario != "None":
-    st.divider()
-    st.subheader("AI Scenario Assessment")
-
-    scenario_context = {
-        "scenario": selected_scenario,
-        "visible_events": int(len(filtered_events)),
-        "affected_commodities": filtered_events["commodity"].astype(str).value_counts().head(10).to_dict() if not filtered_events.empty else {},
-        "affected_countries": filtered_events["country"].astype(str).value_counts().head(10).to_dict() if not filtered_events.empty else {},
-    }
-
-    if not risk_df.empty:
-        scenario_context["bom_exposure"] = {
-            "high_risk_parts": int((risk_df["risk_level"] == "High").sum()),
-            "medium_risk_parts": int((risk_df["risk_level"] == "Medium").sum()),
-            "top_parts": risk_df["part_name"].astype(str).head(10).tolist(),
-        }
-
-    try:
-        with st.spinner("Generating AI scenario assessment..."):
-            scenario_ai = cached_ai_scenario_commentary(
-                json.dumps(scenario_context, sort_keys=True)
-            )
-
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.write(f"**Summary:** {scenario_ai.get('scenario_summary', 'No summary available.')}")
-        st.write(f"**Operational impact:** {scenario_ai.get('operational_impact', 'No operational impact available.')}")
-        st.write(f"**Procurement impact:** {scenario_ai.get('procurement_impact', 'No procurement impact available.')}")
-        st.write(f"**Recommended response:** {scenario_ai.get('recommended_response', 'No response available.')}")
-        st.markdown("</div>", unsafe_allow_html=True)
-    except Exception as e:
-        st.warning(f"AI scenario analysis unavailable: {e}")
-
-if simulator_mode and start_port and end_port:
-    st.divider()
-    with st.expander("🚢 Route Impact Simulator", expanded=True):
-        if start_port == end_port:
-            st.warning("Please select different start and end ports.")
-        else:
-            node_path, route_points, total_distance = build_dynamic_route(start_port, end_port)
-
-            if not route_points:
-                st.error("No route could be calculated for the selected ports.")
-            else:
-                impacted = False
-                scenario_df = pd.DataFrame()
-                reroute_df = pd.DataFrame()
-
-                if selected_route_scenario != "None":
-                    scenario = SCENARIO_ZONES[selected_route_scenario]
-                    impacted = route_impacted(route_points, scenario)
-                    scenario_df = build_scenario_df(selected_route_scenario)
-
-                    reroute_points = get_reroute_points(start_port, end_port, selected_route_scenario)
-                    if impacted and reroute_points:
-                        reroute_df = build_route_df(reroute_points, reroute=True)
-
-                route_df = build_route_df(route_points, impacted=impacted)
-                ports_df = build_port_points_df(start_port, end_port)
-
-                st.markdown(
-                    f"""
-                    <div class="section-card">
-                        <b>Route Summary</b><br>
-                        Origin: {start_port} &nbsp;&nbsp;|&nbsp;&nbsp;
-                        Destination: {end_port} &nbsp;&nbsp;|&nbsp;&nbsp;
-                        Scenario: {selected_route_scenario}
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                render_route_simulator_map(
-                    route_df=route_df,
-                    scenario_df=scenario_df,
-                    ports_df=ports_df,
-                    reroute_df=reroute_df if not reroute_df.empty else None
-                )
-
-                sim_col1, sim_col2, sim_col3 = st.columns(3)
-                sim_col1.metric("Estimated Route Distance", f"{total_distance:,.0f} km")
-                sim_col2.metric("Scenario Selected", selected_route_scenario)
-                sim_col3.metric("Impact Status", "Impacted" if impacted else "Clear")
-
-                st.markdown("#### Calculated Maritime Path")
-                st.code(" → ".join(node_path))
-
-                if selected_route_scenario != "None":
-                    delay = estimate_delay_days(selected_route_scenario, impacted)
-
-                    if impacted:
-                        st.error(f"This route is impacted by {selected_route_scenario}.")
-                        st.write(f"**Expected Delay Impact:** {delay}")
-                        st.write("**Likely Effect:** Higher transit-time risk, schedule volatility, and potential freight cost escalation.")
-                        st.write("**Suggested Action:** Review alternate routing, rebalance safety stock, and evaluate backup sourcing.")
-
-                        if not reroute_df.empty:
-                            st.write("**Reroute Option Displayed:** A fallback detour path has been drawn in purple.")
-                    else:
-                        st.success(f"This route is not directly impacted by {selected_route_scenario}.")
-                        st.write("**Expected Delay Impact:** None to limited direct impact based on current route geometry.")
-
-                if selected_route_scenario != "None":
-                    route_scenario_context = {
-                        "start_port": start_port,
-                        "end_port": end_port,
-                        "scenario": selected_route_scenario,
-                        "route_impacted": impacted,
-                        "route_nodes": node_path,
-                        "estimated_distance_km": round(total_distance, 2),
-                    }
-
-                    try:
-                        with st.spinner("Generating AI route impact assessment..."):
-                            route_ai = cached_ai_scenario_commentary(
-                                json.dumps(route_scenario_context, sort_keys=True)
-                            )
-
-                        st.markdown("#### AI Route Assessment")
-                        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-                        st.write(f"**Summary:** {route_ai.get('scenario_summary', 'No summary available.')}")
-                        st.write(f"**Operational impact:** {route_ai.get('operational_impact', 'No operational impact available.')}")
-                        st.write(f"**Procurement impact:** {route_ai.get('procurement_impact', 'No procurement impact available.')}")
-                        st.write(f"**Recommended response:** {route_ai.get('recommended_response', 'No response available.')}")
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    except Exception as e:
-                        st.warning(f"AI route assessment unavailable: {e}")
-
-st.divider()
-st.markdown("""
-<div class="section-card">
-    <b>How the platform works</b><br><br>
-    1. It ingests live disruption signals across geographies and commodities.<br>
-    2. It maps those disruptions against supplier countries and BOM attributes.<br>
-    3. It flags exposed parts, recommends sourcing actions, and simulates route-level disruption impact.<br>
-    4. AI layers summarize the risk landscape and help prioritize response decisions.
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="shell-card">', unsafe_allow_html=True)
+st.markdown('<div class="section-heading"><div><div class="section-title">Platform logic</div><div class="section-caption">How the workspace converts signals into action</div></div></div>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="muted" style="line-height:1.85;">
+        1. Ingest live disruption signals by geography, commodity, and severity.<br>
+        2. Match those signals against supplier countries and BOM attributes.<br>
+        3. Surface the most exposed parts and suggested sourcing responses.<br>
+        4. Simulate route-level impact to support logistics and procurement decisions.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown("</div>", unsafe_allow_html=True)
