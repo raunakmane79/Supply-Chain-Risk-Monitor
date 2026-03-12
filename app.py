@@ -3,6 +3,7 @@ import pandas as pd
 
 from utils.bom_parser import load_bom, validate_bom, clean_bom, get_bom_template
 from utils.risk_engine import analyze_bom_risk
+from utils.recommender import add_recommendations
 
 
 st.set_page_config(
@@ -73,16 +74,19 @@ selected_severity = st.sidebar.multiselect(
     default=["High", "Medium", "Low"]
 )
 
-# Load sample live events for now
+selected_risk_levels = st.sidebar.multiselect(
+    "Filter by Risk Level",
+    options=["High", "Medium", "Low"],
+    default=["High", "Medium", "Low"]
+)
+
 events_df = load_sample_events()
 
-# Apply filters
 filtered_events = events_df[
     events_df["event_type"].isin(selected_event_types) &
     events_df["severity"].isin(selected_severity)
 ].copy()
 
-# Top metrics
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Live Events", len(filtered_events))
 col2.metric("High Severity Events", int((filtered_events["severity"] == "High").sum()))
@@ -91,7 +95,6 @@ col4.metric("Tracked Commodities", filtered_events["commodity"].nunique())
 
 st.divider()
 
-# Main layout
 left_col, right_col = st.columns([1.2, 1])
 
 with left_col:
@@ -103,7 +106,6 @@ with right_col:
     st.info("Map will be added in the next step using PyDeck.")
 
 st.divider()
-
 st.subheader("Uploaded BOM Preview")
 
 if uploaded_file is not None:
@@ -112,10 +114,7 @@ if uploaded_file is not None:
         is_valid, missing_columns = validate_bom(raw_bom_df)
 
         if not is_valid:
-            st.error(
-                "Missing required BOM columns: "
-                + ", ".join(missing_columns)
-            )
+            st.error("Missing required BOM columns: " + ", ".join(missing_columns))
             st.markdown("### Required Minimum Columns")
             st.code("part_name, supplier_country")
         else:
@@ -128,6 +127,18 @@ if uploaded_file is not None:
             st.subheader("Affected BOM Items")
 
             if not risk_df.empty:
+                risk_df = add_recommendations(risk_df, bom_df)
+                filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
+
+                high_risk_count = int((risk_df["risk_level"] == "High").sum())
+                medium_risk_count = int((risk_df["risk_level"] == "Medium").sum())
+                low_risk_count = int((risk_df["risk_level"] == "Low").sum())
+
+                c1, c2, c3 = st.columns(3)
+                c1.metric("High Risk Parts", high_risk_count)
+                c2.metric("Medium Risk Parts", medium_risk_count)
+                c3.metric("Low Risk Parts", low_risk_count)
+
                 display_cols = [
                     "part_number",
                     "part_name",
@@ -139,40 +150,59 @@ if uploaded_file is not None:
                     "risk_score",
                     "risk_level",
                 ]
+
                 st.dataframe(
-                    risk_df[display_cols],
+                    filtered_risk_df[display_cols],
                     use_container_width=True,
                     hide_index=True
                 )
 
-                high_risk_count = int((risk_df["risk_level"] == "High").sum())
-                medium_risk_count = int((risk_df["risk_level"] == "Medium").sum())
-                low_risk_count = int((risk_df["risk_level"] == "Low").sum())
+                st.subheader("Priority Recommendations")
+                priority_df = filtered_risk_df[filtered_risk_df["risk_level"].isin(["High", "Medium"])].copy()
 
-                c1, c2, c3 = st.columns(3)
-                c1.metric("High Risk Parts", high_risk_count)
-                c2.metric("Medium Risk Parts", medium_risk_count)
-                c3.metric("Low Risk Parts", low_risk_count)
+                if not priority_df.empty:
+                    st.dataframe(
+                        priority_df[
+                            [
+                                "part_name",
+                                "supplier_country",
+                                "risk_level",
+                                "matched_event",
+                                "recommendation",
+                            ]
+                        ],
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                else:
+                    st.info("No high or medium risk parts under current filters.")
 
                 st.subheader("Detailed Risk Explanation")
                 st.dataframe(
-                    risk_df[[
-                        "part_name",
-                        "supplier_name",
-                        "supplier_country",
-                        "matched_event",
-                        "risk_level",
-                        "reason"
-                    ]],
+                    filtered_risk_df[
+                        [
+                            "part_name",
+                            "supplier_name",
+                            "supplier_country",
+                            "matched_event",
+                            "risk_level",
+                            "reason",
+                            "recommendation",
+                        ]
+                    ],
                     use_container_width=True,
                     hide_index=True
                 )
 
+                csv_export = filtered_risk_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    label="Download Risk Analysis Results",
+                    data=csv_export,
+                    file_name="risk_analysis_results.csv",
+                    mime="text/csv"
+                )
             else:
-                st.info("No risk results generated.")
-
-            st.subheader("Recommendations Placeholder")
-            st.info("Procurement recommendations will appear here after the recommendation engine is built.")
+                st.info("No BOM items are directly affected by the current live events.")
 
     except Exception as e:
         st.error(f"Error reading file: {e}")
@@ -180,7 +210,6 @@ else:
     st.warning("Upload a BOM file from the sidebar to begin analysis.")
 
     sample_bom = get_bom_template()
-
     st.markdown("### Sample BOM Format")
     st.dataframe(sample_bom, use_container_width=True, hide_index=True)
 
