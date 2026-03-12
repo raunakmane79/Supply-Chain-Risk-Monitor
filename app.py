@@ -228,42 +228,38 @@ if uploaded_file is not None:
 
             risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
 
-            if not risk_df.empty:
-                risk_df = add_recommendations(risk_df, bom_df)
-                filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
+           if not risk_df.empty:
+    risk_df = add_recommendations(risk_df, bom_df)
 
-                st.divider()
-                st.subheader("Affected BOM Items")
+    filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
 
-                high_risk_count = int((risk_df["risk_level"] == "High").sum())
-                medium_risk_count = int((risk_df["risk_level"] == "Medium").sum())
-                low_risk_count = int((risk_df["risk_level"] == "Low").sum())
+    st.subheader("Affected BOM Items")
 
-                c1, c2, c3 = st.columns(3)
-                c1.metric("High Risk Parts", high_risk_count)
-                c2.metric("Medium Risk Parts", medium_risk_count)
-                c3.metric("Low Risk Parts", low_risk_count)
+    rc1, rc2, rc3 = st.columns(3)
+    rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
+    rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
+    rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
 
-                display_cols = [
-    "part_number",
-    "part_name",
-    "commodity",
-    "supplier_country",
-    "matched_event",
-    "event_type",
-    "impacted_commodity",
-    "rule_trigger",
-    "risk_score",
-    "risk_level",
-]
-existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
+    display_cols = [
+        "part_number",
+        "part_name",
+        "commodity",
+        "supplier_country",
+        "matched_event",
+        "event_type",
+        "impacted_commodity",
+        "rule_trigger",
+        "risk_score",
+        "risk_level",
+    ]
 
-st.dataframe(
-    filtered_risk_df[existing_display_cols],
-    use_container_width=True,
-    hide_index=True
-)
+    existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
 
+    st.dataframe(
+        filtered_risk_df[existing_display_cols],
+        use_container_width=True,
+        hide_index=True
+    )
                 st.subheader("Detailed Risk Explanation")
 st.dataframe(
     filtered_risk_df[
