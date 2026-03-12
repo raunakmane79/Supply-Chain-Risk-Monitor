@@ -1,6 +1,13 @@
 import json
 import streamlit as st
-from google import genai
+
+try:
+    from google import genai
+except ImportError as e:
+    raise ImportError(
+        "Gemini SDK not installed. Add 'google-genai' to requirements.txt and redeploy."
+    ) from e
+
 
 client = genai.Client(api_key=st.secrets["AIzaSyDNMk0aDVMPfy0_321V9FpUeasLY9thgQw"])
 
@@ -9,26 +16,19 @@ def _extract_text(response) -> str:
     try:
         return response.text
     except Exception:
-        pass
-
-    # Fallback
-    try:
-        candidates = getattr(response, "candidates", [])
-        if candidates:
-            parts = candidates[0].content.parts
-            return "".join(getattr(p, "text", "") for p in parts if hasattr(p, "text"))
-    except Exception:
-        pass
-
-    return ""
+        return ""
 
 
 def _load_json(response) -> dict:
     text = _extract_text(response).strip()
 
     if text.startswith("```"):
-        text = text.strip("`")
-        text = text.replace("json", "", 1).strip()
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
 
     return json.loads(text)
 
@@ -36,10 +36,7 @@ def _load_json(response) -> dict:
 def generate_ai_risk_commentary(events_summary: dict, bom_summary: dict) -> dict:
     prompt = f"""
 You are a senior supply chain risk analyst.
-
-Analyze the live disruption summary and BOM risk summary.
-
-Return ONLY valid JSON in this exact shape:
+Return ONLY valid JSON:
 {{
   "executive_summary": "string",
   "top_risks": ["string", "string", "string"],
@@ -58,19 +55,13 @@ BOM summary:
         model="gemini-3.1-pro-preview",
         contents=prompt,
     )
-
     return _load_json(response)
 
 
 def rank_alternate_sources(part_context: dict) -> dict:
     prompt = f"""
 You are an industrial supply chain analyst.
-
-Rank alternate sourcing options for the impacted part.
-Prioritize resilience, geopolitical risk reduction, commodity exposure,
-practicality, and continuity of supply.
-
-Return ONLY valid JSON in this exact shape:
+Return ONLY valid JSON:
 {{
   "best_option": "string",
   "ranking": [
@@ -92,17 +83,13 @@ Part context:
         model="gemini-3.1-pro-preview",
         contents=prompt,
     )
-
     return _load_json(response)
 
 
 def generate_scenario_commentary(scenario_context: dict) -> dict:
     prompt = f"""
 You are a supply chain scenario planning analyst.
-
-Assess this disruption scenario.
-
-Return ONLY valid JSON in this exact shape:
+Return ONLY valid JSON:
 {{
   "scenario_summary": "string",
   "operational_impact": "string",
@@ -118,5 +105,4 @@ Scenario context:
         model="gemini-3.1-pro-preview",
         contents=prompt,
     )
-
     return _load_json(response)
