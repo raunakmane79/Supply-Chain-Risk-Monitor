@@ -29,158 +29,246 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    .main {
-        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    :root {
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --surface-2: #f8fafc;
+        --border: #dbe3ef;
+        --text: #0f172a;
+        --muted: #64748b;
+
+        --sidebar-bg-1: #0b1220;
+        --sidebar-bg-2: #111c34;
+        --sidebar-surface: rgba(255,255,255,0.04);
+        --sidebar-border: rgba(255,255,255,0.08);
+
+        --primary: #2563eb;
+        --primary-soft: #dbeafe;
+
+        --danger: #dc2626;
+        --danger-soft: #fee2e2;
+
+        --warning: #d97706;
+        --warning-soft: #fef3c7;
+
+        --success: #16a34a;
+        --success-soft: #dcfce7;
+
+        --radius: 14px;
+        --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .stApp {
+        background: var(--bg);
     }
 
     .block-container {
-        padding-top: 1.2rem;
+        max-width: 1400px;
+        padding-top: 1.25rem;
         padding-bottom: 2rem;
-        max-width: 1440px;
     }
 
     h1, h2, h3 {
-        color: #0f172a;
+        color: var(--text);
         letter-spacing: -0.02em;
+    }
+
+    p, label, div {
+        color: var(--text);
     }
 
     .hero-card {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: white;
-        padding: 1.5rem 1.6rem;
-        border-radius: 22px;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.20);
+        padding: 1.4rem 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
         margin-bottom: 1rem;
     }
 
     .hero-title {
-        font-size: 2.15rem;
+        font-size: 2rem;
         font-weight: 800;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.35rem;
+        color: white;
     }
 
     .hero-subtitle {
         font-size: 1rem;
-        opacity: 0.9;
         line-height: 1.6;
+        color: rgba(255,255,255,0.88);
     }
 
     .section-card {
-        background: rgba(255,255,255,0.96);
-        border: 1px solid rgba(226,232,240,0.95);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
         padding: 1rem 1.1rem;
-        border-radius: 18px;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        box-shadow: var(--shadow);
         margin-bottom: 1rem;
     }
 
     .insight-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #e2e8f0;
-        border-left: 6px solid #2563eb;
-        padding: 1rem;
-        border-radius: 16px;
-        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.07);
-        margin-bottom: 0.8rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--primary);
+        border-radius: var(--radius);
+        padding: 0.95rem 1rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 0.75rem;
     }
 
-    .risk-high {
-        border-left-color: #dc2626 !important;
-    }
-
-    .risk-medium {
-        border-left-color: #f59e0b !important;
-    }
-
-    .risk-low {
-        border-left-color: #16a34a !important;
-    }
+    .risk-high { border-left-color: var(--danger) !important; }
+    .risk-medium { border-left-color: var(--warning) !important; }
+    .risk-low { border-left-color: var(--success) !important; }
 
     .small-muted {
-        color: #64748b;
-        font-size: 0.92rem;
+        color: var(--muted);
+        font-size: 0.93rem;
     }
 
     .pill {
         display: inline-block;
-        padding: 0.35rem 0.75rem;
+        padding: 0.38rem 0.8rem;
         border-radius: 999px;
         font-size: 0.82rem;
         font-weight: 700;
-        margin-right: 0.4rem;
-        margin-bottom: 0.35rem;
+        margin-right: 0.45rem;
+        margin-bottom: 0.45rem;
+        border: 1px solid transparent;
     }
 
-    .pill-blue { background: #dbeafe; color: #1d4ed8; }
-    .pill-red { background: #fee2e2; color: #b91c1c; }
-    .pill-amber { background: #fef3c7; color: #b45309; }
-    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-blue {
+        background: var(--primary-soft);
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+    }
+
+    .pill-red {
+        background: var(--danger-soft);
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .pill-amber {
+        background: var(--warning-soft);
+        color: #b45309;
+        border-color: #fde68a;
+    }
+
+    .pill-green {
+        background: var(--success-soft);
+        color: #15803d;
+        border-color: #bbf7d0;
+    }
 
     div[data-testid="stMetric"] {
-        background: white;
-        border: 1px solid #e2e8f0;
-        padding: 0.95rem 0.85rem;
-        border-radius: 16px;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.9rem 0.85rem;
+        box-shadow: none;
     }
 
     div[data-testid="stMetricLabel"] {
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: var(--text);
         font-weight: 700;
-        color: #475569;
     }
 
     div[data-testid="stDataFrame"] {
-        border-radius: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        background: white;
     }
 
-    .stButton > button {
-        border-radius: 12px;
-        font-weight: 700;
-        padding: 0.55rem 1rem;
-        border: none;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: white;
-        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
-    }
-
+    .stButton > button,
     .stDownloadButton > button {
         border-radius: 12px;
+        border: 1px solid transparent;
+        background: var(--primary);
+        color: white;
         font-weight: 700;
+        box-shadow: none;
+    }
+
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {
+        background: #1d4ed8;
     }
 
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 100%);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    section[data-testid="stSidebar"] * {
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] div,
+    section[data-testid="stSidebar"] span {
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] .stExpander {
+        background: var(--sidebar-surface);
+        border: 1px solid var(--sidebar-border);
+        border-radius: 12px;
+    }
+
+    section[data-testid="stSidebar"] .stTextInput input,
+    section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div,
+    section[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] > div,
+    section[data-testid="stSidebar"] .stFileUploader section,
+    section[data-testid="stSidebar"] .stNumberInput input {
+        background: rgba(255,255,255,0.06) !important;
         color: white !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        border-radius: 10px !important;
+    }
+
+    section[data-testid="stSidebar"] .stCheckbox {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
     }
 
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .stTabs [data-baseweb="tab"] {
-        background: #e2e8f0;
-        border-radius: 12px;
-        padding: 0.55rem 1rem;
-        font-weight: 700;
+        background: #e9eef5;
+        border-radius: 10px;
+        padding: 0.45rem 0.9rem;
+        font-weight: 600;
+        color: #334155;
     }
 
     .stTabs [aria-selected="true"] {
-        background: #2563eb !important;
+        background: var(--primary) !important;
         color: white !important;
     }
 
+    hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 1.2rem 0;
+    }
+
     .mini-note {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
         padding: 0.75rem 0.9rem;
-        border-radius: 14px;
-        color: #1e3a8a;
-        font-size: 0.93rem;
+        color: var(--muted);
         margin-bottom: 0.9rem;
     }
 </style>
@@ -903,26 +991,22 @@ st.markdown("""
 <div class="hero-card">
     <div class="hero-title">🌍 Supply Chain Risk Monitor</div>
     <div class="hero-subtitle">
-        Monitor global disruptions, evaluate BOM exposure, simulate maritime route risk,
-        and prioritize sourcing action from one decision-ready dashboard.
+        Monitor disruptions, assess BOM exposure, simulate route risk, and prioritize sourcing action.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="section-card">
-    <span class="pill pill-blue">Live Monitoring</span>
-    <span class="pill pill-red">Risk Detection</span>
-    <span class="pill pill-amber">Scenario Planning</span>
-    <span class="pill pill-green">Sourcing Decisions</span>
-    <div class="small-muted" style="margin-top:0.55rem;">
-        Start with live events, then review affected BOM items, then simulate route alternatives if needed.
+    <div style="font-weight:700; margin-bottom:0.35rem;">Workflow</div>
+    <div class="small-muted">
+        Monitor events → analyze BOM exposure → simulate route risk → act on sourcing decisions.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.sidebar.markdown("## Control Center")
-st.sidebar.markdown("Use the steps below to move from monitoring → analysis → action.")
+st.sidebar.caption("Move from monitoring to action.")
 
 events_df = get_live_events()
 
@@ -1027,10 +1111,10 @@ events_summary = {
 }
 
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🌐 Live Events",
-    "🗺 Risk Map",
-    "📈 Trends & Regions",
-    "📦 BOM Analysis"
+    "Live Events",
+    "Risk Map",
+    "Trends",
+    "BOM Analysis"
 ])
 
 with tab1:
