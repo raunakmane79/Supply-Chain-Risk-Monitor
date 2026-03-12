@@ -1,21 +1,102 @@
 part_number,part_name,commodity,material,supplier_name,supplier_country,supplier_city,annual_usage,unit_cost,criticality,alternate_supplier
-P1001,PCB Assembly,Semiconductor,Electronics,ABC Circuits,Taiwan,Taichung,5000,32,High,XYZ Electronics
-P1002,Copper Wiring,Copper,Metal,Metro Metals,Chile,Santiago,9000,6,Medium,Alt Copper Ltd
-P1003,Steel Bracket,Steel,Metal,ForgePro,India,Pune,12000,3,Low,SteelWorks
-P1004,Lithium Cell,Lithium,Battery Material,VoltSource,China,Shenzhen,7000,18,High,PowerCell
-P1005,Aluminum Housing,Aluminum,Metal,AlloyTech,Germany,Berlin,8000,12,Medium,MetalWorks EU
-P1006,Nickel Connector,Nickel,Metal,NickelCore,Canada,Toronto,6000,8,Medium,Global Nickel Ltd
-P1007,Cobalt Cathode,Cobalt,Battery Material,BlueMinerals,DR Congo,Kolwezi,4500,20,High,AltBattery Inc
-P1008,Plastic Resin Body,Plastic Resin,Polymer,PolyChem,United States,Houston,10000,4,Low,ResinCorp
-P1009,Glass Panel,Silica,Glass,ClearView,China,Shanghai,7000,9,Medium,GlassWorks
-P1010,Rare Earth Magnet,Rare Earth Elements,Magnetic Material,NeoMag,China,Baotou,3000,25,High,MagTech
-P1011,Microcontroller,Microchips,Semiconductor,ChipCore,South Korea,Seoul,8000,15,High,SemiLogic
-P1012,Memory Module,Memory Chips,Semiconductor,DataChips,Taiwan,Hsinchu,6000,14,High,MemoryTech
-P1013,Hydraulic Pump Housing,Cast Iron,Metal,IronForge,India,Ahmedabad,5000,11,Medium,ForgeWorks
-P1014,Industrial Battery Pack,Batteries,Energy Storage,VoltEdge,China,Nanjing,4000,28,High,EnergyPack
-P1015,Fertilizer Compound,Fertilizers,Chemical,AgriChem,Canada,Calgary,7000,7,Low,FarmChem
-P1016,Ammonia Tank Input,Ammonia,Chemical,GreenChem,United States,Texas City,4500,10,Medium,AltChem
-P1017,Hydrogen Storage Unit,Hydrogen,Energy,CleanFuel,Germany,Hamburg,2000,35,High,H2Systems
-P1018,Rubber Gasket,Rubber,Polymer,FlexSeal,Thailand,Bangkok,9000,2,Low,SealTech
-P1019,Electronic Sensor,Electronics,Electronic Component,SenseCore,Japan,Osaka,5500,16,Medium,SenseWorks
-P1020,Steel Fastener Set,Steel,Metal,FastenPro,United States,Detroit,15000,1,Low,BoltWorks
+P1001,Graphite Component 1,Graphite,Battery Material,Titan Manufacturing,Germany,Berlin,11651,28,High,Neo Supply
+P1002,Wheat Component 2,Wheat,Agriculture,Global Materials,South Korea,Seoul,10532,25,Low,Neo Supply
+P1003,Cobalt Component 3,Cobalt,Battery Material,Titan Manufacturing,United States,Houston,7272,3,High,Apex Resources
+P1004,Platinum Component 4,Platinum,Metal,Apex Resources,South Korea,Seoul,8880,36,Medium,Atlas Industrial
+P1005,Steel Component 5,Steel,Metal,Neo Supply,Chile,Santiago,7316,22,Medium,Prime Metals
+P1006,Titanium Component 6,Titanium,Metal,Core Components,Germany,Berlin,7023,34,Medium,Global Materials
+P1007,Gold Component 7,Gold,Metal,Core Components,Taiwan,Taichung,10330,38,High,Core Components
+P1008,Hydrogen Component 8,Hydrogen,Energy,NovaTech Supply,South Korea,Seoul,2484,25,Low,Atlas Industrial
+P1009,Microchips Component 9,Microchips,Semiconductor,Quantum Circuits,Chile,Santiago,4328,9,High,Neo Supply
+P1010,Tin Component 10,Tin,Metal,Quantum Circuits,India,Pune,7821,17,Medium,NextGen Materials
+P1011,Palm Oil Component 11,Palm Oil,Agriculture,NovaTech Supply,Japan,Osaka,11758,28,High,NextGen Materials
+P1012,Wheat Component 12,Wheat,Agriculture,NextGen Materials,India,Pune,4645,3,Low,Titan Manufacturing
+P1013,Microchips Component 13,Microchips,Semiconductor,NextGen Materials,India,Pune,14184,4,Low,Global Materials
+P1014,Corn Component 14,Corn,Agriculture,NovaTech Supply,Canada,Toronto,7229,17,High,Global Materials
+P1015,Glass Component 15,Glass,Construction,NextGen Materials,China,Shenzhen,7673,22,High,Titan Manufacturing
+P1016,Fertilizers Component 16,Fertilizers,Chemical,NovaTech Supply,Canada,Toronto,12606,2,Low,Neo Supply
+P1017,Electronics Component 17,Electronics,Electronic Component,Atlas Industrial,Germany,Berlin,5166,14,High,Atlas Industrial
+P1018,Graphite Component 18,Graphite,Battery Material,Atlas Industrial,Chile,Santiago,6720,4,High,NovaTech Supply
+P1019,Graphite Component 19,Graphite,Battery Material,Quantum Circuits,Taiwan,Taichung,3862,14,High,NextGen Materials
+P1020,Glass Component 20,Glass,Construction,Atlas Industrial,Taiwan,Taichung,2551,38,Low,Quantum Circuits
+P1021,Corn Component 21,Corn,Agriculture,Apex Resources,Chile,Santiago,2676,8,High,Global Materials
+P1022,Crude Oil Component 22,Crude Oil,Energy,Core Components,Germany,Berlin,10368,26,High,Titan Manufacturing
+P1023,Crude Oil Component 23,Crude Oil,Energy,NextGen Materials,Germany,Berlin,13529,31,High,Apex Resources
+P1024,Nickel Component 24,Nickel,Metal,Titan Manufacturing,Chile,Santiago,12783,21,Low,Titan Manufacturing
+P1025,Corn Component 25,Corn,Agriculture,Titan Manufacturing,South Korea,Seoul,6859,33,High,Global Materials
+P1026,Zinc Component 26,Zinc,Metal,Apex Resources,Australia,Perth,2271,20,Medium,Quantum Circuits
+P1027,Aluminum Component 27,Aluminum,Metal,Titan Manufacturing,Canada,Toronto,13679,21,Low,NovaTech Supply
+P1028,Hydrogen Component 28,Hydrogen,Energy,Titan Manufacturing,Australia,Perth,9112,6,Medium,Apex Resources
+P1029,Nickel Component 29,Nickel,Metal,Titan Manufacturing,Germany,Berlin,13831,34,Low,Atlas Industrial
+P1030,Ammonia Component 30,Ammonia,Chemical,Atlas Industrial,Thailand,Bangkok,10349,25,High,Prime Metals
+P1031,Copper Component 31,Copper,Metal,NextGen Materials,United States,Houston,4155,34,Medium,Core Components
+P1032,Hydrogen Component 32,Hydrogen,Energy,Apex Resources,Germany,Berlin,5556,18,High,Core Components
+P1033,Nickel Component 33,Nickel,Metal,NovaTech Supply,Australia,Perth,5538,24,Medium,NextGen Materials
+P1034,Nickel Component 34,Nickel,Metal,NextGen Materials,Taiwan,Taichung,13914,30,High,Titan Manufacturing
+P1035,Zinc Component 35,Zinc,Metal,NovaTech Supply,Germany,Berlin,7147,3,Medium,NovaTech Supply
+P1036,Silver Component 36,Silver,Metal,Global Materials,Brazil,Sao Paulo,9233,8,High,Core Components
+P1037,Fertilizers Component 37,Fertilizers,Chemical,Quantum Circuits,Thailand,Bangkok,7271,3,Low,Neo Supply
+P1038,Graphite Component 38,Graphite,Battery Material,Prime Metals,Thailand,Bangkok,7260,31,Low,Global Materials
+P1039,Palm Oil Component 39,Palm Oil,Agriculture,Neo Supply,Japan,Osaka,13765,36,High,Prime Metals
+P1040,Crude Oil Component 40,Crude Oil,Energy,Titan Manufacturing,Taiwan,Taichung,4257,4,Medium,Global Materials
+P1041,Nickel Component 41,Nickel,Metal,Titan Manufacturing,Taiwan,Taichung,8599,33,Medium,NextGen Materials
+P1042,Zinc Component 42,Zinc,Metal,Quantum Circuits,Canada,Toronto,11143,22,Low,Titan Manufacturing
+P1043,Rubber Component 43,Rubber,Polymer,Global Materials,Canada,Toronto,12963,26,Low,NextGen Materials
+P1044,Memory Chips Component 44,Memory Chips,Semiconductor,Core Components,Canada,Toronto,3479,39,Low,Core Components
+P1045,Hydrogen Component 45,Hydrogen,Energy,Apex Resources,India,Pune,4011,2,Medium,Prime Metals
+P1046,Aluminum Component 46,Aluminum,Metal,Quantum Circuits,China,Shenzhen,14472,31,Low,Apex Resources
+P1047,Batteries Component 47,Batteries,Energy Storage,Apex Resources,Australia,Perth,2343,23,High,Prime Metals
+P1048,Semiconductor Component 48,Semiconductor,Electronics,Titan Manufacturing,South Korea,Seoul,8012,9,High,Atlas Industrial
+P1049,Platinum Component 49,Platinum,Metal,Core Components,India,Pune,5906,27,Low,Apex Resources
+P1050,Gold Component 50,Gold,Metal,Neo Supply,Australia,Perth,12256,24,Medium,Core Components
+P1051,Corn Component 51,Corn,Agriculture,Prime Metals,Canada,Toronto,7879,5,Low,NovaTech Supply
+P1052,Microchips Component 52,Microchips,Semiconductor,NovaTech Supply,Germany,Berlin,9464,38,Medium,Titan Manufacturing
+P1053,Gold Component 53,Gold,Metal,Prime Metals,Taiwan,Taichung,3266,18,Low,NovaTech Supply
+P1054,Gold Component 54,Gold,Metal,Prime Metals,Chile,Santiago,11154,2,Low,Core Components
+P1055,Silver Component 55,Silver,Metal,Prime Metals,Chile,Santiago,13135,35,Medium,NextGen Materials
+P1056,Rare Earth Elements Component 56,Rare Earth Elements,Magnetic Material,Global Materials,South Korea,Seoul,10308,23,Medium,Apex Resources
+P1057,Glass Component 57,Glass,Construction,Atlas Industrial,South Korea,Seoul,11734,9,High,Quantum Circuits
+P1058,Corn Component 58,Corn,Agriculture,Titan Manufacturing,China,Shenzhen,6549,39,Medium,Core Components
+P1059,Electronics Component 59,Electronics,Electronic Component,Global Materials,China,Shenzhen,13650,40,Medium,Atlas Industrial
+P1060,Gold Component 60,Gold,Metal,Neo Supply,Thailand,Bangkok,3340,26,Low,NextGen Materials
+P1061,Glass Component 61,Glass,Construction,Neo Supply,Canada,Toronto,13620,40,High,Global Materials
+P1062,Silica Component 62,Silica,Glass,Atlas Industrial,Japan,Osaka,7182,23,High,Global Materials
+P1063,Hydrogen Component 63,Hydrogen,Energy,Titan Manufacturing,United States,Houston,7260,22,High,Neo Supply
+P1064,Cobalt Component 64,Cobalt,Battery Material,NextGen Materials,India,Pune,5615,14,Low,Atlas Industrial
+P1065,Wheat Component 65,Wheat,Agriculture,Prime Metals,China,Shenzhen,14170,2,Low,NextGen Materials
+P1066,Palm Oil Component 66,Palm Oil,Agriculture,Quantum Circuits,India,Pune,10288,30,High,Prime Metals
+P1067,Tin Component 67,Tin,Metal,Atlas Industrial,Thailand,Bangkok,9202,5,Low,NovaTech Supply
+P1068,Lithium Component 68,Lithium,Battery Material,Core Components,Canada,Toronto,10418,24,Medium,Atlas Industrial
+P1069,Tin Component 69,Tin,Metal,Neo Supply,Taiwan,Taichung,12109,23,Medium,Global Materials
+P1070,Hydrogen Component 70,Hydrogen,Energy,Global Materials,Taiwan,Taichung,12229,39,Medium,NextGen Materials
+P1071,Gold Component 71,Gold,Metal,Core Components,United States,Houston,14611,27,High,Neo Supply
+P1072,Zinc Component 72,Zinc,Metal,Titan Manufacturing,South Korea,Seoul,13779,30,Low,NextGen Materials
+P1073,Electronics Component 73,Electronics,Electronic Component,Atlas Industrial,Australia,Perth,14018,5,Low,Core Components
+P1074,Palm Oil Component 74,Palm Oil,Agriculture,Core Components,Thailand,Bangkok,12911,14,Low,Atlas Industrial
+P1075,Gold Component 75,Gold,Metal,Titan Manufacturing,Thailand,Bangkok,11965,9,High,Atlas Industrial
+P1076,Batteries Component 76,Batteries,Energy Storage,Prime Metals,Chile,Santiago,6550,30,Medium,NextGen Materials
+P1077,Lithium Component 77,Lithium,Battery Material,Quantum Circuits,Brazil,Sao Paulo,2852,33,Medium,NextGen Materials
+P1078,Copper Component 78,Copper,Metal,Quantum Circuits,Brazil,Sao Paulo,2642,38,Medium,NovaTech Supply
+P1079,Graphite Component 79,Graphite,Battery Material,NovaTech Supply,Germany,Berlin,13147,37,Low,Quantum Circuits
+P1080,Ammonia Component 80,Ammonia,Chemical,Global Materials,Taiwan,Taichung,9601,35,Medium,Core Components
+P1081,Graphite Component 81,Graphite,Battery Material,NextGen Materials,Taiwan,Taichung,8685,35,Medium,Quantum Circuits
+P1082,Aluminum Component 82,Aluminum,Metal,Apex Resources,India,Pune,9688,5,High,Core Components
+P1083,Corn Component 83,Corn,Agriculture,Core Components,Thailand,Bangkok,7299,19,High,Global Materials
+P1084,Ammonia Component 84,Ammonia,Chemical,NextGen Materials,India,Pune,5613,5,High,Quantum Circuits
+P1085,Palm Oil Component 85,Palm Oil,Agriculture,NextGen Materials,Thailand,Bangkok,6233,30,High,NextGen Materials
+P1086,Cement Component 86,Cement,Construction,Apex Resources,Japan,Osaka,5283,10,Medium,Global Materials
+P1087,Tin Component 87,Tin,Metal,Apex Resources,India,Pune,7465,21,High,Quantum Circuits
+P1088,Lead Component 88,Lead,Metal,Apex Resources,South Korea,Seoul,8455,9,Medium,Quantum Circuits
+P1089,Silica Component 89,Silica,Glass,Core Components,Chile,Santiago,2995,7,Medium,NextGen Materials
+P1090,Graphite Component 90,Graphite,Battery Material,Atlas Industrial,Thailand,Bangkok,14065,37,High,Global Materials
+P1091,Copper Component 91,Copper,Metal,Core Components,China,Shenzhen,5065,40,Low,NextGen Materials
+P1092,Electronics Component 92,Electronics,Electronic Component,Quantum Circuits,Thailand,Bangkok,10946,34,Low,Apex Resources
+P1093,Rare Earth Elements Component 93,Rare Earth Elements,Magnetic Material,Atlas Industrial,Thailand,Bangkok,4499,17,Low,Neo Supply
+P1094,Copper Component 94,Copper,Metal,Titan Manufacturing,United States,Houston,5291,40,High,Global Materials
+P1095,Memory Chips Component 95,Memory Chips,Semiconductor,Quantum Circuits,South Korea,Seoul,12225,36,Medium,Titan Manufacturing
+P1096,Cast Iron Component 96,Cast Iron,Metal,Global Materials,India,Pune,3502,5,Medium,Core Components
+P1097,Plastic Resin Component 97,Plastic Resin,Polymer,Global Materials,India,Pune,6778,31,Low,Core Components
+P1098,Zinc Component 98,Zinc,Metal,Core Components,United States,Houston,11307,10,Medium,NextGen Materials
+P1099,Platinum Component 99,Platinum,Metal,NovaTech Supply,India,Pune,4901,37,Medium,Quantum Circuits
+P1100,Ammonia Component 100,Ammonia,Chemical,Atlas Industrial,Brazil,Sao Paulo,7818,36,High,NovaTech Supply
+
