@@ -180,12 +180,12 @@ left_col, right_col = st.columns([1.05, 1])
 
 with left_col:
     st.subheader("Live Global Events")
-   event_display_cols = [
-    "event_type", "title", "country", "commodity", "severity", "source", "event_time"
-]
-existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
-st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
-
+    event_display_cols = [
+        "event_type", "title", "country", "commodity", "severity", "source", "event_time"
+    ]
+    existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
+    st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
+    
     source_summary = (
         filtered_events.groupby("source")
         .size()
