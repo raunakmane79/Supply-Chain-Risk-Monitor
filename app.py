@@ -228,7 +228,7 @@ if uploaded_file is not None:
 
             risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
 
-           if not risk_df.empty:
+if not risk_df.empty:
     risk_df = add_recommendations(risk_df, bom_df)
 
     filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
