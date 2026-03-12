@@ -1048,10 +1048,9 @@ with st.sidebar.expander("Route simulation", expanded=False):
         end_port = st.selectbox("End port", port_names, index=1, key="route_end_port")
         selected_route_scenario = st.selectbox("Scenario", ["None"] + list(SCENARIO_ZONES.keys()), key="route_scenario")
 
-st.sidebar.markdown("---")
-if st.sidebar.button("Refresh live events", use_container_width=True, type="primary"):    st.cache_data.clear()
+if st.sidebar.button("Refresh live events", use_container_width=True, type="primary"):
+    st.cache_data.clear()
     st.rerun()
-
 
 # Data preparation
 if not events_df.empty:
