@@ -49,13 +49,9 @@ st.markdown(
         --sidebar-muted: rgba(241,245,249,0.72);
 
         --blue: #2563eb;
-        --blue-soft: rgba(37, 99, 235, 0.10);
         --red: #dc2626;
-        --red-soft: rgba(220, 38, 38, 0.12);
         --amber: #d97706;
-        --amber-soft: rgba(217, 119, 6, 0.12);
         --green: #16a34a;
-        --green-soft: rgba(22, 163, 74, 0.12);
 
         --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.05);
         --shadow-md: 0 18px 50px rgba(15, 23, 42, 0.08);
@@ -93,6 +89,7 @@ st.markdown(
         color: inherit;
     }
 
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 100%);
         border-right: 1px solid rgba(255,255,255,0.06);
@@ -114,31 +111,53 @@ st.markdown(
         color: var(--sidebar-muted) !important;
     }
 
+    /* Expander */
+    [data-testid="stSidebar"] details {
+        background: transparent !important;
+    }
+
     [data-testid="stSidebar"] .stExpander {
         background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03));
         border: 1px solid var(--sidebar-border);
-        border-radius: 20px;
+        border-radius: 22px;
         overflow: hidden;
+        margin-bottom: 0.95rem;
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-        margin-bottom: 0.9rem;
     }
 
-    [data-testid="stSidebar"] .stExpander details {
+    [data-testid="stSidebar"] .stExpander > details {
+        border-radius: 22px;
         background: transparent !important;
     }
 
     [data-testid="stSidebar"] .stExpander summary {
-        padding-top: 0.3rem !important;
-        padding-bottom: 0.3rem !important;
+        background: transparent !important;
         color: var(--sidebar-text) !important;
         font-weight: 700 !important;
+        padding: 0.95rem 1rem !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander summary:hover {
+        background: rgba(255,255,255,0.03) !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander summary svg {
+        fill: var(--sidebar-text) !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander details[open] > summary {
+        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+        margin-bottom: 0 !important;
     }
 
     [data-testid="stSidebar"] .stExpander details > div {
         background: transparent !important;
-        padding-top: 0.25rem;
+        padding: 0.9rem 1rem 1rem 1rem !important;
     }
 
+    /* Labels */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] .stMarkdown,
     [data-testid="stSidebar"] .stText,
@@ -150,29 +169,33 @@ st.markdown(
         font-weight: 600 !important;
     }
 
+    /* Select / multiselect */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] .stTextInput input,
-    [data-testid="stSidebar"] .stNumberInput input {
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid var(--sidebar-border) !important;
         color: var(--sidebar-text) !important;
-        border-radius: 14px !important;
-        min-height: 48px !important;
+        border-radius: 16px !important;
+        min-height: 50px !important;
         box-shadow: none !important;
     }
 
     [data-testid="stSidebar"] [data-baseweb="tag"] {
-        background: rgba(239, 68, 68, 0.16) !important;
-        border: 1px solid rgba(239, 68, 68, 0.26) !important;
-        color: #fecaca !important;
+        background: rgba(239, 68, 68, 0.14) !important;
+        border: 1px solid rgba(239, 68, 68, 0.20) !important;
+        color: #ffe4e6 !important;
         border-radius: 10px !important;
     }
 
     [data-testid="stSidebar"] [data-baseweb="tag"] span,
     [data-testid="stSidebar"] [data-baseweb="tag"] svg {
-        color: #fee2e2 !important;
-        fill: #fee2e2 !important;
+        color: #fff1f2 !important;
+        fill: #fff1f2 !important;
+    }
+
+    /* File uploader */
+    [data-testid="stSidebar"] .stFileUploader {
+        width: 100%;
     }
 
     [data-testid="stSidebar"] .stFileUploader > div {
@@ -180,46 +203,63 @@ st.markdown(
     }
 
     [data-testid="stSidebar"] .stFileUploader section {
-        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04)) !important;
+        background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.05)) !important;
         border: 1px dashed rgba(255,255,255,0.16) !important;
         border-radius: 18px !important;
-        padding: 1rem !important;
+        padding: 1.1rem !important;
     }
 
     [data-testid="stSidebar"] .stFileUploader section:hover {
         border-color: rgba(255,255,255,0.24) !important;
-        background: rgba(255,255,255,0.07) !important;
+        background: rgba(255,255,255,0.08) !important;
     }
 
     [data-testid="stSidebar"] .stFileUploader small,
-    [data-testid="stSidebar"] .stFileUploader span,
-    [data-testid="stSidebar"] .stFileUploader p {
+    [data-testid="stSidebar"] .stFileUploader p,
+    [data-testid="stSidebar"] .stFileUploader span {
         color: var(--sidebar-muted) !important;
     }
 
     [data-testid="stSidebar"] .stFileUploader button {
         background: #ffffff !important;
         color: #0f172a !important;
-        border: 0 !important;
+        border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        padding: 0.45rem 0.9rem !important;
+        min-height: 42px !important;
+        padding: 0.5rem 0.95rem !important;
+        box-shadow: none !important;
     }
 
+    [data-testid="stSidebar"] .stFileUploader button * {
+        color: #0f172a !important;
+    }
+
+    /* Sidebar buttons */
     [data-testid="stSidebar"] .stButton button,
     [data-testid="stSidebar"] .stDownloadButton button {
+        width: 100%;
+        min-height: 48px !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
         background: #ffffff !important;
         color: #0f172a !important;
-        border: 0 !important;
-        border-radius: 14px !important;
         font-weight: 700 !important;
-        min-height: 48px;
         box-shadow: none !important;
     }
 
     [data-testid="stSidebar"] .stButton button:hover,
     [data-testid="stSidebar"] .stDownloadButton button:hover {
         background: #f8fafc !important;
+        color: #0f172a !important;
+    }
+
+    [data-testid="stSidebar"] .stButton button:disabled,
+    [data-testid="stSidebar"] .stDownloadButton button:disabled {
+        background: rgba(255,255,255,0.88) !important;
+        color: rgba(15,23,42,0.35) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        opacity: 1 !important;
     }
 
     [data-testid="stSidebar"] hr {
@@ -228,6 +268,7 @@ st.markdown(
         margin: 1rem 0;
     }
 
+    /* Main cards */
     .top-shell {
         margin-bottom: 1rem;
     }
@@ -501,7 +542,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 SCENARIOS = {
     "Strait of Hormuz Closure": {
         "countries": ["Iran"],
@@ -1033,8 +1073,13 @@ with st.sidebar.expander("Live updates", expanded=True):
     selected_event_types = st.multiselect("Event type", options=event_type_options, default=event_type_options)
     selected_severity = st.multiselect("Severity", options=severity_options, default=severity_options)
 
-with st.sidebar.expander("Upload BOM", expanded=True):
-    uploaded_file = st.file_uploader("Upload BOM", type=["csv", "xlsx", "xls"])
+with st.sidebar.expander("Upload BOM", expanded=False):
+    st.caption("Upload your BOM file")
+    uploaded_file = st.file_uploader(
+    "Upload BOM",
+    type=["csv", "xlsx", "xls"],
+    label_visibility="collapsed"
+)    
     selected_risk_levels = st.multiselect("Risk level", options=["High", "Medium", "Low"], default=["High", "Medium", "Low"])
 
 with st.sidebar.expander("Route simulation", expanded=False):
@@ -1048,7 +1093,7 @@ with st.sidebar.expander("Route simulation", expanded=False):
         end_port = st.selectbox("End port", port_names, index=1, key="route_end_port")
         selected_route_scenario = st.selectbox("Scenario", ["None"] + list(SCENARIO_ZONES.keys()), key="route_scenario")
 
-if st.sidebar.button("Refresh live events", use_container_width=True, type="primary"):
+if st.sidebar.button("Refresh live events", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
