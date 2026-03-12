@@ -1,8 +1,7 @@
 import pandas as pd
 
 
-HIGH_SEVERITY_EVENTS = {"High": 20, "Medium": 10, "Low": 5}
-
+SEVERITY_SCORES = {"High": 20, "Medium": 10, "Low": 5}
 CRITICALITY_SCORES = {"High": 20, "Medium": 10, "Low": 5}
 
 
@@ -15,10 +14,11 @@ def normalize_text(value) -> str:
 def calculate_risk_score(
     bom_row: pd.Series,
     event_row: pd.Series,
-) -> tuple[int, list[str]]:
+) -> tuple[int, list[str], bool]:
     """
     Calculates risk score for one BOM item against one event.
-    Returns (score, reasons)
+    Returns:
+        score, reasons, is_relevant_match
     """
     score = 0
     reasons = []
@@ -33,33 +33,40 @@ def calculate_risk_score(
     event_commodity = normalize_text(event_row.get("commodity", ""))
     event_severity = str(event_row.get("severity", "Low")).strip().title()
 
+    geography_match = False
+    commodity_match = False
+
     # Geography match
     if supplier_country and event_country and supplier_country == event_country:
         score += 50
+        geography_match = True
         reasons.append(f"Supplier country matches event country ({event_row['country']})")
 
-    # Commodity match
+    # Commodity / material match
     if commodity and event_commodity and commodity == event_commodity:
         score += 30
+        commodity_match = True
         reasons.append(f"Commodity match with impacted commodity ({event_row['commodity']})")
     elif material and event_commodity and material == event_commodity:
         score += 20
+        commodity_match = True
         reasons.append(f"Material match with impacted commodity ({event_row['commodity']})")
 
-    # Severity
-    score += HIGH_SEVERITY_EVENTS.get(event_severity, 5)
-    reasons.append(f"Event severity is {event_severity}")
+    # Only meaningful if at least geography or commodity match exists
+    is_relevant_match = geography_match or commodity_match
 
-    # Criticality
-    score += CRITICALITY_SCORES.get(criticality, 10)
-    reasons.append(f"Part criticality is {criticality}")
+    if is_relevant_match:
+        score += SEVERITY_SCORES.get(event_severity, 5)
+        reasons.append(f"Event severity is {event_severity}")
 
-    # No alternate supplier
-    if not alternate_supplier:
-        score += 10
-        reasons.append("No alternate supplier listed")
+        score += CRITICALITY_SCORES.get(criticality, 10)
+        reasons.append(f"Part criticality is {criticality}")
 
-    return score, reasons
+        if not alternate_supplier:
+            score += 10
+            reasons.append("No alternate supplier listed")
+
+    return score, reasons, is_relevant_match
 
 
 def get_risk_level(score: int) -> str:
@@ -67,7 +74,9 @@ def get_risk_level(score: int) -> str:
         return "High"
     if score >= 50:
         return "Medium"
-    return "Low"
+    if score > 0:
+        return "Low"
+    return "No Direct Risk"
 
 
 def analyze_bom_risk(
@@ -75,7 +84,7 @@ def analyze_bom_risk(
     events_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Compare each BOM row with each event and keep the highest-risk match.
+    Compare each BOM row with each event and keep the highest-risk relevant match.
     """
     if bom_df.empty or events_df.empty:
         return pd.DataFrame()
@@ -84,37 +93,44 @@ def analyze_bom_risk(
 
     for _, bom_row in bom_df.iterrows():
         best_match = None
-        best_score = -1
+        best_score = 0
         best_reasons = []
+        found_relevant_match = False
 
         for _, event_row in events_df.iterrows():
-            score, reasons = calculate_risk_score(bom_row, event_row)
+            score, reasons, is_relevant_match = calculate_risk_score(bom_row, event_row)
 
-            if score > best_score:
+            if is_relevant_match and score > best_score:
                 best_score = score
                 best_match = event_row
                 best_reasons = reasons
+                found_relevant_match = True
 
-        risk_level = get_risk_level(best_score)
+        if found_relevant_match and best_match is not None:
+            risk_level = get_risk_level(best_score)
 
-        results.append(
-            {
-                "part_number": bom_row.get("part_number", ""),
-                "part_name": bom_row.get("part_name", ""),
-                "commodity": bom_row.get("commodity", ""),
-                "supplier_name": bom_row.get("supplier_name", ""),
-                "supplier_country": bom_row.get("supplier_country", ""),
-                "criticality": bom_row.get("criticality", ""),
-                "matched_event": best_match.get("title", "") if best_match is not None else "",
-                "event_type": best_match.get("event_type", "") if best_match is not None else "",
-                "event_country": best_match.get("country", "") if best_match is not None else "",
-                "impacted_commodity": best_match.get("commodity", "") if best_match is not None else "",
-                "event_severity": best_match.get("severity", "") if best_match is not None else "",
-                "risk_score": best_score,
-                "risk_level": risk_level,
-                "reason": " | ".join(best_reasons),
-            }
-        )
+            results.append(
+                {
+                    "part_number": bom_row.get("part_number", ""),
+                    "part_name": bom_row.get("part_name", ""),
+                    "commodity": bom_row.get("commodity", ""),
+                    "supplier_name": bom_row.get("supplier_name", ""),
+                    "supplier_country": bom_row.get("supplier_country", ""),
+                    "criticality": bom_row.get("criticality", ""),
+                    "alternate_supplier": bom_row.get("alternate_supplier", ""),
+                    "matched_event": best_match.get("title", ""),
+                    "event_type": best_match.get("event_type", ""),
+                    "event_country": best_match.get("country", ""),
+                    "impacted_commodity": best_match.get("commodity", ""),
+                    "event_severity": best_match.get("severity", ""),
+                    "risk_score": best_score,
+                    "risk_level": risk_level,
+                    "reason": " | ".join(best_reasons),
+                }
+            )
+
+    if not results:
+        return pd.DataFrame()
 
     results_df = pd.DataFrame(results)
     results_df = results_df.sort_values(by="risk_score", ascending=False).reset_index(drop=True)
