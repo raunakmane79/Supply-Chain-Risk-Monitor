@@ -248,3 +248,22 @@ def analyze_bom_risk(
 
     results_df = pd.DataFrame(results)
     return results_df.sort_values(by="risk_score", ascending=False).reset_index(drop=True)
+    def infer_conflict_commodities(event_title: str, event_country: str):
+    text = f"{event_title} {event_country}".lower()
+
+    if any(x in text for x in ["iran", "hormuz", "middle east", "oil", "lng", "gas"]):
+        return ["Crude Oil", "Natural Gas", "Petrochemicals"]
+
+    if any(x in text for x in ["taiwan", "chip", "semiconductor", "electronics"]):
+        return ["Semiconductor", "Microchips", "Electronics"]
+
+    if any(x in text for x in ["chile", "peru", "copper", "mining strike"]):
+        return ["Copper"]
+
+    if any(x in text for x in ["lithium", "nickel", "cobalt", "battery"]):
+        return ["Lithium", "Nickel", "Cobalt", "Batteries"]
+
+    if any(x in text for x in ["shipping", "port", "freight", "container", "red sea"]):
+        return ["Logistics", "Imported Parts"]
+
+    return []
