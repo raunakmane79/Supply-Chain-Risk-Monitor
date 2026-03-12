@@ -11,6 +11,11 @@ from utils.bom_parser import load_bom, validate_bom, clean_bom, get_bom_template
 from utils.risk_engine import analyze_bom_risk
 from utils.recommender import add_recommendations
 from utils.event_loader import load_all_events
+from utils.ai_engine import (
+    generate_ai_risk_commentary,
+    rank_alternate_sources,
+    generate_scenario_commentary,
+)
 
 
 st.set_page_config(
