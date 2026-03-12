@@ -32,6 +32,8 @@ st.markdown(
     """
 st.markdown(
     """
+st.markdown(
+    """
     <style>
     :root {
         --bg: #f6f8fb;
@@ -88,7 +90,6 @@ st.markdown(
         letter-spacing: -0.03em;
     }
 
-    /* MAIN APP ONLY */
     [data-testid="stAppViewContainer"] p,
     [data-testid="stAppViewContainer"] label,
     [data-testid="stAppViewContainer"] div,
@@ -96,7 +97,6 @@ st.markdown(
         color: inherit;
     }
 
-    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 100%);
         border-right: 1px solid rgba(255,255,255,0.06);
@@ -118,7 +118,6 @@ st.markdown(
         color: var(--sidebar-muted) !important;
     }
 
-    /* Sidebar section cards / expanders */
     [data-testid="stSidebar"] .stExpander {
         background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03));
         border: 1px solid var(--sidebar-border);
@@ -144,7 +143,6 @@ st.markdown(
         padding-top: 0.25rem;
     }
 
-    /* Labels */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] .stMarkdown,
     [data-testid="stSidebar"] .stText,
@@ -156,7 +154,6 @@ st.markdown(
         font-weight: 600 !important;
     }
 
-    /* Inputs */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
     [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div,
     [data-testid="stSidebar"] .stTextInput input,
@@ -169,7 +166,6 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* Multiselect tags */
     [data-testid="stSidebar"] [data-baseweb="tag"] {
         background: rgba(239, 68, 68, 0.16) !important;
         border: 1px solid rgba(239, 68, 68, 0.26) !important;
@@ -183,7 +179,6 @@ st.markdown(
         fill: #fee2e2 !important;
     }
 
-    /* File uploader */
     [data-testid="stSidebar"] .stFileUploader > div {
         width: 100%;
     }
@@ -215,7 +210,6 @@ st.markdown(
         padding: 0.45rem 0.9rem !important;
     }
 
-    /* Buttons */
     [data-testid="stSidebar"] .stButton button,
     [data-testid="stSidebar"] .stDownloadButton button {
         background: #ffffff !important;
@@ -232,14 +226,12 @@ st.markdown(
         background: #f8fafc !important;
     }
 
-    /* Divider */
     [data-testid="stSidebar"] hr {
         border: none;
         border-top: 1px solid rgba(255,255,255,0.08);
         margin: 1rem 0;
     }
 
-    /* MAIN CONTENT CARDS */
     .top-shell {
         margin-bottom: 1rem;
     }
@@ -271,8 +263,8 @@ st.markdown(
         gap: 0.45rem;
         padding: 0.38rem 0.72rem;
         border-radius: 999px;
-        background: var(--blue-soft);
-        color: var(--blue);
+        background: rgba(37, 99, 235, 0.10);
+        color: #2563eb;
         font-size: 0.78rem;
         font-weight: 700;
         margin-bottom: 0.9rem;
@@ -397,20 +389,20 @@ st.markdown(
     }
 
     .pill.high {
-        background: var(--red-soft);
-        color: var(--red);
+        background: rgba(220, 38, 38, 0.12);
+        color: #dc2626;
         border-color: rgba(220,38,38,0.18);
     }
 
     .pill.medium {
-        background: var(--amber-soft);
-        color: var(--amber);
+        background: rgba(217, 119, 6, 0.12);
+        color: #d97706;
         border-color: rgba(217,119,6,0.18);
     }
 
     .pill.low {
-        background: var(--green-soft);
-        color: var(--green);
+        background: rgba(22, 163, 74, 0.12);
+        color: #16a34a;
         border-color: rgba(22,163,74,0.16);
     }
 
@@ -435,15 +427,15 @@ st.markdown(
     }
 
     .insight.high {
-        border-left: 4px solid var(--red);
+        border-left: 4px solid #dc2626;
     }
 
     .insight.medium {
-        border-left: 4px solid var(--amber);
+        border-left: 4px solid #d97706;
     }
 
     .insight.low {
-        border-left: 4px solid var(--green);
+        border-left: 4px solid #16a34a;
     }
 
     .insight-title {
