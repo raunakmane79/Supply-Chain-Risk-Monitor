@@ -30,28 +30,35 @@ st.set_page_config(
 
 st.markdown(
     """
+st.markdown(
+    """
     <style>
     :root {
         --bg: #f6f8fb;
-        --panel: rgba(255,255,255,0.78);
+        --panel: rgba(255,255,255,0.82);
         --panel-solid: #ffffff;
-        --panel-2: #f9fbfd;
         --line: rgba(15, 23, 42, 0.08);
         --line-strong: rgba(15, 23, 42, 0.14);
         --text: #0f172a;
         --muted: #64748b;
-        --navy: #0f172a;
+
+        --sidebar-bg-1: #07111f;
+        --sidebar-bg-2: #0b1730;
+        --sidebar-surface: rgba(255,255,255,0.05);
+        --sidebar-surface-2: rgba(255,255,255,0.07);
+        --sidebar-border: rgba(255,255,255,0.10);
+        --sidebar-text: #f8fafc;
+        --sidebar-muted: rgba(241,245,249,0.72);
+
         --blue: #2563eb;
         --blue-soft: rgba(37, 99, 235, 0.10);
         --red: #dc2626;
-        --red-soft: rgba(220, 38, 38, 0.10);
+        --red-soft: rgba(220, 38, 38, 0.12);
         --amber: #d97706;
-        --amber-soft: rgba(217, 119, 6, 0.11);
+        --amber-soft: rgba(217, 119, 6, 0.12);
         --green: #16a34a;
-        --green-soft: rgba(22, 163, 74, 0.10);
-        --radius-xl: 24px;
-        --radius-lg: 18px;
-        --radius-md: 14px;
+        --green-soft: rgba(22, 163, 74, 0.12);
+
         --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.05);
         --shadow-md: 0 18px 50px rgba(15, 23, 42, 0.08);
     }
@@ -63,14 +70,14 @@ st.markdown(
     .stApp {
         background:
             radial-gradient(circle at top left, rgba(37,99,235,0.06), transparent 25%),
-            radial-gradient(circle at top right, rgba(15,23,42,0.06), transparent 22%),
+            radial-gradient(circle at top right, rgba(15,23,42,0.05), transparent 22%),
             var(--bg);
         color: var(--text);
     }
 
     .block-container {
         max-width: 1520px;
-        padding-top: 1.1rem;
+        padding-top: 1.05rem;
         padding-bottom: 2rem;
         padding-left: 1.25rem;
         padding-right: 1.25rem;
@@ -81,71 +88,167 @@ st.markdown(
         letter-spacing: -0.03em;
     }
 
-    p, label, div, span {
-        color: var(--text);
+    /* MAIN APP ONLY */
+    [data-testid="stAppViewContainer"] p,
+    [data-testid="stAppViewContainer"] label,
+    [data-testid="stAppViewContainer"] div,
+    [data-testid="stAppViewContainer"] span {
+        color: inherit;
     }
 
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #081120 0%, #0f172a 55%, #111827 100%);
+        background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 100%);
         border-right: 1px solid rgba(255,255,255,0.06);
     }
 
     [data-testid="stSidebar"] > div:first-child {
         padding-top: 1rem;
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
     }
 
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] small {
-        color: #f8fafc !important;
+    [data-testid="stSidebar"] * {
+        color: var(--sidebar-text);
     }
 
+    [data-testid="stSidebar"] .stCaption,
+    [data-testid="stSidebar"] small,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+        color: var(--sidebar-muted) !important;
+    }
+
+    /* Sidebar section cards / expanders */
     [data-testid="stSidebar"] .stExpander {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03));
+        border: 1px solid var(--sidebar-border);
+        border-radius: 20px;
         overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        margin-bottom: 0.9rem;
     }
 
-    [data-testid="stSidebar"] .stExpander details summary {
-        padding-top: 0.2rem;
-        padding-bottom: 0.2rem;
+    [data-testid="stSidebar"] .stExpander details {
+        background: transparent !important;
     }
 
+    [data-testid="stSidebar"] .stExpander summary {
+        padding-top: 0.3rem !important;
+        padding-bottom: 0.3rem !important;
+        color: var(--sidebar-text) !important;
+        font-weight: 700 !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander details > div {
+        background: transparent !important;
+        padding-top: 0.25rem;
+    }
+
+    /* Labels */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] .stText,
+    [data-testid="stSidebar"] .stSelectbox label,
+    [data-testid="stSidebar"] .stMultiSelect label,
+    [data-testid="stSidebar"] .stFileUploader label,
+    [data-testid="stSidebar"] .stCheckbox label {
+        color: var(--sidebar-text) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Inputs */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
     [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] .stFileUploader section,
     [data-testid="stSidebar"] .stTextInput input,
     [data-testid="stSidebar"] .stNumberInput input {
         background: rgba(255,255,255,0.06) !important;
-        border: 1px solid rgba(255,255,255,0.10) !important;
-        color: white !important;
+        border: 1px solid var(--sidebar-border) !important;
+        color: var(--sidebar-text) !important;
         border-radius: 14px !important;
+        min-height: 48px !important;
+        box-shadow: none !important;
     }
 
+    /* Multiselect tags */
+    [data-testid="stSidebar"] [data-baseweb="tag"] {
+        background: rgba(239, 68, 68, 0.16) !important;
+        border: 1px solid rgba(239, 68, 68, 0.26) !important;
+        color: #fecaca !important;
+        border-radius: 10px !important;
+    }
+
+    [data-testid="stSidebar"] [data-baseweb="tag"] span,
+    [data-testid="stSidebar"] [data-baseweb="tag"] svg {
+        color: #fee2e2 !important;
+        fill: #fee2e2 !important;
+    }
+
+    /* File uploader */
+    [data-testid="stSidebar"] .stFileUploader > div {
+        width: 100%;
+    }
+
+    [data-testid="stSidebar"] .stFileUploader section {
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04)) !important;
+        border: 1px dashed rgba(255,255,255,0.16) !important;
+        border-radius: 18px !important;
+        padding: 1rem !important;
+    }
+
+    [data-testid="stSidebar"] .stFileUploader section:hover {
+        border-color: rgba(255,255,255,0.24) !important;
+        background: rgba(255,255,255,0.07) !important;
+    }
+
+    [data-testid="stSidebar"] .stFileUploader small,
+    [data-testid="stSidebar"] .stFileUploader span,
+    [data-testid="stSidebar"] .stFileUploader p {
+        color: var(--sidebar-muted) !important;
+    }
+
+    [data-testid="stSidebar"] .stFileUploader button {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        padding: 0.45rem 0.9rem !important;
+    }
+
+    /* Buttons */
     [data-testid="stSidebar"] .stButton button,
     [data-testid="stSidebar"] .stDownloadButton button {
-        background: white !important;
+        background: #ffffff !important;
         color: #0f172a !important;
         border: 0 !important;
         border-radius: 14px !important;
         font-weight: 700 !important;
+        min-height: 48px;
+        box-shadow: none !important;
     }
 
+    [data-testid="stSidebar"] .stButton button:hover,
+    [data-testid="stSidebar"] .stDownloadButton button:hover {
+        background: #f8fafc !important;
+    }
+
+    /* Divider */
+    [data-testid="stSidebar"] hr {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        margin: 1rem 0;
+    }
+
+    /* MAIN CONTENT CARDS */
     .top-shell {
         margin-bottom: 1rem;
     }
 
     .hero {
-        background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,255,255,0.70));
+        background: linear-gradient(135deg, rgba(255,255,255,0.86), rgba(255,255,255,0.72));
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
-        border: 1px solid rgba(255,255,255,0.55);
+        border: 1px solid rgba(255,255,255,0.58);
         box-shadow: var(--shadow-md);
         border-radius: 28px;
         padding: 1.5rem 1.5rem 1.35rem 1.5rem;
@@ -226,10 +329,10 @@ st.markdown(
     }
 
     .shell-card {
-        background: rgba(255,255,255,0.82);
+        background: rgba(255,255,255,0.84);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.65);
+        border: 1px solid rgba(255,255,255,0.68);
         border-radius: 24px;
         padding: 1rem 1rem 1.05rem 1rem;
         box-shadow: var(--shadow-sm);
@@ -254,13 +357,6 @@ st.markdown(
     .section-caption {
         font-size: 0.92rem;
         color: var(--muted);
-    }
-
-    .metric-card {
-        background: rgba(255,255,255,0.72);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 1rem;
     }
 
     div[data-testid="stMetric"] {
@@ -328,12 +424,6 @@ st.markdown(
         border: 1px solid rgba(37,99,235,0.12);
         color: var(--muted);
         margin-top: 0.2rem;
-    }
-
-    .subtle-grid {
-        display: grid;
-        grid-template-columns: repeat(12, minmax(0,1fr));
-        gap: 1rem;
     }
 
     .insight {
@@ -423,7 +513,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 SCENARIOS = {
     "Strait of Hormuz Closure": {
@@ -936,9 +1025,13 @@ def render_priorities(filtered_risk_df: pd.DataFrame):
         )
 
 
-# Sidebar controls
 st.sidebar.markdown("## Control Center")
-st.sidebar.caption("Live monitoring, sourcing exposure, and route resilience in one workspace.")
+st.sidebar.markdown(
+    '<div style="color: rgba(241,245,249,0.72); font-size: 0.96rem; line-height: 1.65; margin-bottom: 0.6rem;">'
+    'Live monitoring, sourcing exposure, and route resilience in one workspace.'
+    '</div>',
+    unsafe_allow_html=True,
+)
 
 events_df = get_live_events()
 if events_df.empty:
@@ -952,7 +1045,7 @@ with st.sidebar.expander("Live updates", expanded=True):
     selected_event_types = st.multiselect("Event type", options=event_type_options, default=event_type_options)
     selected_severity = st.multiselect("Severity", options=severity_options, default=severity_options)
 
-with st.sidebar.expander("BOM upload", expanded=True):
+with st.sidebar.expander("Upload BOM", expanded=True):
     uploaded_file = st.file_uploader("Upload BOM", type=["csv", "xlsx", "xls"])
     selected_risk_levels = st.multiselect("Risk level", options=["High", "Medium", "Low"], default=["High", "Medium", "Low"])
 
@@ -968,8 +1061,7 @@ with st.sidebar.expander("Route simulation", expanded=False):
         selected_route_scenario = st.selectbox("Scenario", ["None"] + list(SCENARIO_ZONES.keys()), key="route_scenario")
 
 st.sidebar.markdown("---")
-if st.sidebar.button("Refresh live events", use_container_width=True):
-    st.cache_data.clear()
+if st.sidebar.button("Refresh live events", use_container_width=True, type="primary"):    st.cache_data.clear()
     st.rerun()
 
 
