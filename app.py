@@ -97,13 +97,33 @@ def render_event_map(events_df: pd.DataFrame):
     st.pydeck_chart(deck, use_container_width=True)
 
 
-st.title("🌍 AI-Inspired Supply Chain Risk Monitor")
-st.markdown(
-    """
-    Monitor live global disruptions, upload a BOM, and identify which parts may be exposed
-    based on supplier geography and commodity risk.
-    """
+def style_risk_table(df: pd.DataFrame):
+    if df.empty:
+        return df
+    return df.style.applymap(
+        lambda x: (
+            "background-color: #fee2e2; color: #991b1b; font-weight: 600"
+            if x == "High"
+            else "background-color: #fef3c7; color: #92400e; font-weight: 600"
+            if x == "Medium"
+            else "background-color: #dcfce7; color: #166534; font-weight: 600"
+            if x == "Low"
+            else ""
+        ),
+        subset=["risk_level"]
+    )
+
+
+st.title("🌍 Supply Chain Risk Monitor")
+st.caption(
+    "Track global disruptions, upload a bill of materials, and identify exposed parts with sourcing recommendations."
 )
+
+top_left, top_right = st.columns([4, 1])
+with top_right:
+    if st.button("Refresh Live Events"):
+        st.cache_data.clear()
+        st.rerun()
 
 st.sidebar.header("Controls")
 uploaded_file = st.sidebar.file_uploader(
@@ -139,15 +159,22 @@ filtered_events = events_df[
     events_df["severity"].isin(selected_severity)
 ].copy()
 
-col1, col2, col3, col4 = st.columns(4)
+st.markdown("### Executive Summary")
+col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Live Events", len(filtered_events))
 col2.metric("High Severity Events", int((filtered_events["severity"] == "High").sum()))
 col3.metric("Countries Affected", filtered_events["country"].nunique())
 col4.metric("Tracked Commodities", filtered_events["commodity"].nunique())
+col5.metric("Live Feed Sources", filtered_events["source"].nunique())
+
+legend_col1, legend_col2, legend_col3 = st.columns(3)
+legend_col1.markdown("🟥 **High Risk / High Severity**")
+legend_col2.markdown("🟨 **Medium Risk / Medium Severity**")
+legend_col3.markdown("🟩 **Low Risk / Low Severity**")
 
 st.divider()
 
-left_col, right_col = st.columns([1.1, 1])
+left_col, right_col = st.columns([1.05, 1])
 
 with left_col:
     st.subheader("Live Global Events")
@@ -157,12 +184,21 @@ with left_col:
     existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
     st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
 
+    source_summary = (
+        filtered_events.groupby("source")
+        .size()
+        .reset_index(name="event_count")
+        .sort_values("event_count", ascending=False)
+    )
+    st.markdown("#### Event Source Mix")
+    st.dataframe(source_summary, use_container_width=True, hide_index=True)
+
 with right_col:
     st.subheader("Live Risk Map")
     render_event_map(filtered_events)
 
 st.divider()
-st.subheader("Uploaded BOM Preview")
+st.subheader("BOM Risk Analysis")
 
 if uploaded_file is not None:
     try:
@@ -171,20 +207,31 @@ if uploaded_file is not None:
 
         if not is_valid:
             st.error("Missing required BOM columns: " + ", ".join(missing_columns))
-            st.markdown("### Required Minimum Columns")
+            st.markdown("#### Required Minimum Columns")
             st.code("part_name, supplier_country")
         else:
             bom_df = clean_bom(raw_bom_df)
-            st.success("BOM uploaded and validated successfully.")
-            st.dataframe(bom_df, use_container_width=True, hide_index=True)
+
+            bom_col1, bom_col2 = st.columns([1.3, 1])
+            with bom_col1:
+                st.success("BOM uploaded and validated successfully.")
+                st.dataframe(bom_df, use_container_width=True, hide_index=True)
+
+            with bom_col2:
+                st.markdown("#### Uploaded BOM Summary")
+                st.metric("Total Parts", len(bom_df))
+                st.metric("Supplier Countries", bom_df["supplier_country"].nunique())
+                if "commodity" in bom_df.columns:
+                    st.metric("Tracked BOM Commodities", bom_df["commodity"].replace("", pd.NA).dropna().nunique())
 
             risk_df = analyze_bom_risk(bom_df, filtered_events)
-
-            st.subheader("Affected BOM Items")
 
             if not risk_df.empty:
                 risk_df = add_recommendations(risk_df, bom_df)
                 filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
+
+                st.divider()
+                st.subheader("Affected BOM Items")
 
                 high_risk_count = int((risk_df["risk_level"] == "High").sum())
                 medium_risk_count = int((risk_df["risk_level"] == "Medium").sum())
@@ -206,11 +253,10 @@ if uploaded_file is not None:
                     "risk_score",
                     "risk_level",
                 ]
-
                 existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
 
                 st.dataframe(
-                    filtered_risk_df[existing_display_cols],
+                    style_risk_table(filtered_risk_df[existing_display_cols]),
                     use_container_width=True,
                     hide_index=True
                 )
@@ -267,10 +313,10 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"Error reading file: {e}")
 else:
-    st.warning("Upload a BOM file from the sidebar to begin analysis.")
+    st.info("Upload a BOM file from the sidebar to begin analysis.")
 
     sample_bom = get_bom_template()
-    st.markdown("### Sample BOM Format")
+    st.markdown("#### Sample BOM Format")
     st.dataframe(sample_bom, use_container_width=True, hide_index=True)
 
     csv_data = sample_bom.to_csv(index=False).encode("utf-8")
@@ -280,3 +326,11 @@ else:
         file_name="sample_bom_template.csv",
         mime="text/csv"
     )
+
+st.divider()
+st.markdown(
+    """
+    **How it works:**  
+    The platform monitors live disruption signals, maps affected geographies, compares them with supplier locations and commodities in the uploaded BOM, and highlights parts that may need sourcing action.
+    """
+)
