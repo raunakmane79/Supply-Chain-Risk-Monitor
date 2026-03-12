@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 import json
+import math
+import heapq
 
 sys.path.append(str(Path(__file__).parent.resolve()))
 
@@ -58,6 +60,215 @@ SCENARIOS = {
         "severity": "High",
         "latitude": 20.0,
         "longitude": 38.0,
+    },
+}
+
+PORTS = {
+    "Shanghai": {"lat": 31.2304, "lon": 121.4737, "region": "Asia"},
+    "Shenzhen": {"lat": 22.5431, "lon": 114.0579, "region": "Asia"},
+    "Hong Kong": {"lat": 22.3193, "lon": 114.1694, "region": "Asia"},
+    "Singapore": {"lat": 1.2903, "lon": 103.8519, "region": "Asia"},
+    "Busan": {"lat": 35.1796, "lon": 129.0756, "region": "Asia"},
+    "Kaohsiung": {"lat": 22.6273, "lon": 120.3014, "region": "Asia"},
+    "Tokyo": {"lat": 35.6762, "lon": 139.6503, "region": "Asia"},
+    "Manila": {"lat": 14.5995, "lon": 120.9842, "region": "Asia"},
+    "Jakarta": {"lat": -6.2088, "lon": 106.8456, "region": "Asia"},
+    "Mumbai": {"lat": 19.0760, "lon": 72.8777, "region": "Asia"},
+    "Chennai": {"lat": 13.0827, "lon": 80.2707, "region": "Asia"},
+    "Dubai": {"lat": 25.2048, "lon": 55.2708, "region": "Middle East"},
+    "Jeddah": {"lat": 21.4858, "lon": 39.1925, "region": "Middle East"},
+    "Dammam": {"lat": 26.4207, "lon": 50.0888, "region": "Middle East"},
+    "Rotterdam": {"lat": 51.9244, "lon": 4.4777, "region": "Europe"},
+    "Hamburg": {"lat": 53.5511, "lon": 9.9937, "region": "Europe"},
+    "Antwerp": {"lat": 51.2194, "lon": 4.4025, "region": "Europe"},
+    "Valencia": {"lat": 39.4699, "lon": -0.3763, "region": "Europe"},
+    "Piraeus": {"lat": 37.9420, "lon": 23.6465, "region": "Europe"},
+    "London": {"lat": 51.5072, "lon": -0.1276, "region": "Europe"},
+    "Los Angeles": {"lat": 34.0522, "lon": -118.2437, "region": "North America"},
+    "Long Beach": {"lat": 33.7701, "lon": -118.1937, "region": "North America"},
+    "Houston": {"lat": 29.7604, "lon": -95.3698, "region": "North America"},
+    "New York": {"lat": 40.7128, "lon": -74.0060, "region": "North America"},
+    "Savannah": {"lat": 32.0809, "lon": -81.0912, "region": "North America"},
+    "Vancouver": {"lat": 49.2827, "lon": -123.1207, "region": "North America"},
+    "Panama City": {"lat": 8.9824, "lon": -79.5199, "region": "North America"},
+    "Santos": {"lat": -23.9608, "lon": -46.3336, "region": "South America"},
+    "Callao": {"lat": -12.0621, "lon": -77.1353, "region": "South America"},
+    "Buenos Aires": {"lat": -34.6037, "lon": -58.3816, "region": "South America"},
+    "Durban": {"lat": -29.8587, "lon": 31.0218, "region": "Africa"},
+    "Cape Town": {"lat": -33.9249, "lon": 18.4241, "region": "Africa"},
+    "Mombasa": {"lat": -4.0435, "lon": 39.6682, "region": "Africa"},
+    "Lagos": {"lat": 6.5244, "lon": 3.3792, "region": "Africa"},
+    "Sydney": {"lat": -33.8688, "lon": 151.2093, "region": "Oceania"},
+    "Melbourne": {"lat": -37.8136, "lon": 144.9631, "region": "Oceania"},
+}
+
+ROUTE_NODES = {
+    "SouthChinaSea": {"lat": 12.0, "lon": 114.0},
+    "EastChinaSea": {"lat": 28.0, "lon": 125.0},
+    "SeaOfJapan": {"lat": 37.0, "lon": 136.0},
+    "TaiwanStrait": {"lat": 24.0, "lon": 119.5},
+    "PhilippineSea": {"lat": 18.0, "lon": 135.0},
+    "Malacca": {"lat": 2.5, "lon": 101.0},
+    "JavaSea": {"lat": -5.0, "lon": 112.0},
+    "TimorSea": {"lat": -11.0, "lon": 125.0},
+    "IndianOceanEast": {"lat": -12.0, "lon": 95.0},
+    "IndianOceanMid": {"lat": -10.0, "lon": 80.0},
+    "ArabianSea": {"lat": 15.0, "lon": 65.0},
+    "BayOfBengal": {"lat": 15.0, "lon": 88.0},
+    "Hormuz": {"lat": 26.5667, "lon": 56.25},
+    "GulfOfAden": {"lat": 12.0, "lon": 48.0},
+    "RedSea": {"lat": 20.0, "lon": 38.0},
+    "Suez": {"lat": 29.9668, "lon": 32.5498},
+    "MediterraneanEast": {"lat": 34.5, "lon": 28.0},
+    "MediterraneanCentral": {"lat": 36.0, "lon": 18.0},
+    "MediterraneanWest": {"lat": 37.0, "lon": 2.0},
+    "Gibraltar": {"lat": 36.1408, "lon": -5.3536},
+    "NorthSea": {"lat": 55.0, "lon": 3.0},
+    "BalticGate": {"lat": 56.0, "lon": 10.0},
+    "PanamaCanal": {"lat": 9.08, "lon": -79.68},
+    "PacificMid": {"lat": 25.0, "lon": -160.0},
+    "NorthPacificWest": {"lat": 35.0, "lon": 160.0},
+    "NorthPacificEast": {"lat": 35.0, "lon": -145.0},
+    "SouthPacificMid": {"lat": -20.0, "lon": -140.0},
+    "CapeOfGoodHope": {"lat": -34.0, "lon": 18.5},
+    "SouthAtlantic": {"lat": -20.0, "lon": -10.0},
+    "NorthAtlantic": {"lat": 35.0, "lon": -30.0},
+    "WestAfrica": {"lat": 5.0, "lon": -5.0},
+    "EastAfrica": {"lat": -2.0, "lon": 42.0},
+    "TasmanSea": {"lat": -35.0, "lon": 155.0},
+}
+
+SEA_LANE_EDGES = [
+    ("Shanghai", "EastChinaSea"),
+    ("Shenzhen", "SouthChinaSea"),
+    ("Hong Kong", "SouthChinaSea"),
+    ("Busan", "SeaOfJapan"),
+    ("Kaohsiung", "TaiwanStrait"),
+    ("Tokyo", "EastChinaSea"),
+    ("Manila", "PhilippineSea"),
+    ("Jakarta", "JavaSea"),
+    ("Singapore", "Malacca"),
+    ("Mumbai", "ArabianSea"),
+    ("Chennai", "BayOfBengal"),
+    ("Dubai", "Hormuz"),
+    ("Dammam", "Hormuz"),
+    ("Jeddah", "RedSea"),
+    ("Rotterdam", "NorthSea"),
+    ("Hamburg", "NorthSea"),
+    ("Antwerp", "NorthSea"),
+    ("Valencia", "MediterraneanWest"),
+    ("Piraeus", "MediterraneanEast"),
+    ("London", "NorthSea"),
+    ("Los Angeles", "NorthPacificEast"),
+    ("Long Beach", "NorthPacificEast"),
+    ("Vancouver", "NorthPacificEast"),
+    ("Houston", "PanamaCanal"),
+    ("New York", "NorthAtlantic"),
+    ("Savannah", "NorthAtlantic"),
+    ("Panama City", "PanamaCanal"),
+    ("Santos", "SouthAtlantic"),
+    ("Callao", "SouthPacificMid"),
+    ("Buenos Aires", "SouthAtlantic"),
+    ("Durban", "CapeOfGoodHope"),
+    ("Cape Town", "CapeOfGoodHope"),
+    ("Mombasa", "EastAfrica"),
+    ("Lagos", "WestAfrica"),
+    ("Sydney", "TasmanSea"),
+    ("Melbourne", "TasmanSea"),
+
+    ("SeaOfJapan", "EastChinaSea"),
+    ("EastChinaSea", "TaiwanStrait"),
+    ("EastChinaSea", "NorthPacificWest"),
+    ("TaiwanStrait", "SouthChinaSea"),
+    ("TaiwanStrait", "PhilippineSea"),
+    ("SouthChinaSea", "Malacca"),
+    ("SouthChinaSea", "PhilippineSea"),
+    ("PhilippineSea", "NorthPacificWest"),
+    ("NorthPacificWest", "PacificMid"),
+    ("NorthPacificEast", "PacificMid"),
+    ("PacificMid", "NorthPacificEast"),
+
+    ("JavaSea", "Malacca"),
+    ("JavaSea", "TimorSea"),
+    ("TimorSea", "IndianOceanEast"),
+    ("TasmanSea", "SouthPacificMid"),
+
+    ("Malacca", "IndianOceanEast"),
+    ("BayOfBengal", "Malacca"),
+    ("BayOfBengal", "IndianOceanMid"),
+    ("IndianOceanEast", "IndianOceanMid"),
+    ("IndianOceanMid", "ArabianSea"),
+    ("IndianOceanMid", "CapeOfGoodHope"),
+    ("ArabianSea", "Hormuz"),
+    ("ArabianSea", "GulfOfAden"),
+    ("EastAfrica", "GulfOfAden"),
+    ("EastAfrica", "CapeOfGoodHope"),
+    ("GulfOfAden", "RedSea"),
+    ("RedSea", "Suez"),
+    ("Suez", "MediterraneanEast"),
+    ("MediterraneanEast", "MediterraneanCentral"),
+    ("MediterraneanCentral", "MediterraneanWest"),
+    ("MediterraneanWest", "Gibraltar"),
+    ("Gibraltar", "NorthSea"),
+    ("Gibraltar", "NorthAtlantic"),
+    ("Gibraltar", "WestAfrica"),
+    ("WestAfrica", "SouthAtlantic"),
+    ("CapeOfGoodHope", "SouthAtlantic"),
+    ("SouthAtlantic", "NorthAtlantic"),
+    ("SouthAtlantic", "PanamaCanal"),
+    ("PanamaCanal", "SouthPacificMid"),
+    ("PanamaCanal", "NorthPacificEast"),
+    ("NorthAtlantic", "NorthSea"),
+]
+
+SCENARIO_ZONES = {
+    "Strait of Hormuz Closure": {
+        "center": [56.25, 26.5667],
+        "radius_km": 450,
+        "severity": "High",
+        "impact": "Oil, LNG, Middle East shipping",
+    },
+    "Red Sea Disruption": {
+        "center": [38.0, 20.0],
+        "radius_km": 900,
+        "severity": "High",
+        "impact": "Asia-Europe shipping",
+    },
+    "Suez Canal Blockage": {
+        "center": [32.5498, 29.9668],
+        "radius_km": 250,
+        "severity": "High",
+        "impact": "Europe-Asia maritime corridor",
+    },
+    "Panama Canal Restriction": {
+        "center": [-79.68, 9.08],
+        "radius_km": 250,
+        "severity": "High",
+        "impact": "Atlantic-Pacific flows",
+    },
+    "Taiwan Strait Tension": {
+        "center": [119.5, 24.0],
+        "radius_km": 500,
+        "severity": "High",
+        "impact": "Semiconductor and East Asia shipping",
+    },
+    "Cape Diversion Pressure": {
+        "center": [18.5, -34.0],
+        "radius_km": 500,
+        "severity": "Medium",
+        "impact": "Long-route diversion stress",
+    },
+    "South China Sea Tension": {
+        "center": [114.0, 12.0],
+        "radius_km": 800,
+        "severity": "High",
+        "impact": "Asia intra-regional trade and electronics flows",
+    },
+    "North Pacific Storm Corridor": {
+        "center": [-160.0, 25.0],
+        "radius_km": 1200,
+        "severity": "Medium",
+        "impact": "Trans-Pacific shipping delays",
     },
 }
 
@@ -207,11 +418,7 @@ def render_timeline(events_df: pd.DataFrame):
         return
 
     df = events_df.copy()
-
-    # Force datetime conversion safely
     df["event_time"] = pd.to_datetime(df["event_time"], errors="coerce", utc=True)
-
-    # Drop anything that could not be parsed
     df = df.dropna(subset=["event_time"])
 
     if df.empty:
@@ -236,19 +443,30 @@ REGION_MAP = {
     "South Korea": "Asia",
     "Singapore": "Asia",
     "Vietnam": "Asia",
+    "Philippines": "Asia",
+    "Indonesia": "Asia",
     "Iran": "Middle East",
     "Israel": "Middle East",
     "Egypt": "Middle East",
     "Yemen": "Middle East",
+    "Saudi Arabia": "Middle East",
+    "UAE": "Middle East",
     "Ukraine": "Europe",
     "Russia": "Europe",
     "Germany": "Europe",
+    "Netherlands": "Europe",
+    "Belgium": "Europe",
     "Chile": "South America",
     "Brazil": "South America",
     "Peru": "South America",
+    "Argentina": "South America",
     "United States": "North America",
     "Canada": "North America",
     "Mexico": "North America",
+    "South Africa": "Africa",
+    "Kenya": "Africa",
+    "Nigeria": "Africa",
+    "Australia": "Oceania",
 }
 
 
@@ -274,6 +492,230 @@ def render_regional_summary(events_df: pd.DataFrame):
         .sort_values("live_events", ascending=False)
     )
     st.dataframe(summary, use_container_width=True, hide_index=True)
+
+
+def haversine_km(lon1, lat1, lon2, lat2):
+    r = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(math.radians(lat1))
+        * math.cos(math.radians(lat2))
+        * math.sin(dlon / 2) ** 2
+    )
+    return 2 * r * math.asin(math.sqrt(a))
+
+
+def get_node_coord(name):
+    if name in PORTS:
+        return PORTS[name]["lon"], PORTS[name]["lat"]
+    if name in ROUTE_NODES:
+        return ROUTE_NODES[name]["lon"], ROUTE_NODES[name]["lat"]
+    raise KeyError(f"Unknown node: {name}")
+
+
+def build_graph():
+    graph = {}
+    for a, b in SEA_LANE_EDGES:
+        lon1, lat1 = get_node_coord(a)
+        lon2, lat2 = get_node_coord(b)
+        dist = haversine_km(lon1, lat1, lon2, lat2)
+
+        graph.setdefault(a, []).append((b, dist))
+        graph.setdefault(b, []).append((a, dist))
+    return graph
+
+
+def shortest_path(graph, start, end):
+    pq = [(0, start, [])]
+    visited = set()
+
+    while pq:
+        cost, node, path = heapq.heappop(pq)
+
+        if node in visited:
+            continue
+        visited.add(node)
+        path = path + [node]
+
+        if node == end:
+            return path, cost
+
+        for neighbor, weight in graph.get(node, []):
+            if neighbor not in visited:
+                heapq.heappush(pq, (cost + weight, neighbor, path))
+
+    return None, None
+
+
+def nodes_to_path(node_path):
+    coords = []
+    for node in node_path:
+        lon, lat = get_node_coord(node)
+        coords.append([lon, lat])
+    return coords
+
+
+def build_dynamic_route(start_port, end_port):
+    graph = build_graph()
+    node_path, total_distance = shortest_path(graph, start_port, end_port)
+
+    if not node_path:
+        return None, None, None
+
+    route_points = nodes_to_path(node_path)
+    return node_path, route_points, total_distance
+
+
+def route_impacted(route_points, scenario):
+    center_lon, center_lat = scenario["center"]
+    radius_km = scenario["radius_km"]
+
+    for lon, lat in route_points:
+        if haversine_km(lon, lat, center_lon, center_lat) <= radius_km:
+            return True
+    return False
+
+
+def build_route_df(route_points, impacted=False, reroute=False):
+    return pd.DataFrame([
+        {
+            "name": "Rerouted Route" if reroute else "Simulated Route",
+            "path": route_points,
+            "color": [168, 85, 247] if reroute else ([220, 38, 38] if impacted else [37, 99, 235]),
+        }
+    ])
+
+
+def build_scenario_df(selected_route_scenario):
+    zone = SCENARIO_ZONES[selected_route_scenario]
+    return pd.DataFrame([
+        {
+            "name": selected_route_scenario,
+            "longitude": zone["center"][0],
+            "latitude": zone["center"][1],
+            "radius": zone["radius_km"] * 1000,
+            "color": [245, 158, 11, 120],
+            "impact": zone["impact"],
+            "severity": zone["severity"],
+        }
+    ])
+
+
+def build_port_points_df(start_port, end_port):
+    return pd.DataFrame([
+        {
+            "name": start_port,
+            "longitude": PORTS[start_port]["lon"],
+            "latitude": PORTS[start_port]["lat"],
+            "impact": "Route origin",
+        },
+        {
+            "name": end_port,
+            "longitude": PORTS[end_port]["lon"],
+            "latitude": PORTS[end_port]["lat"],
+            "impact": "Route destination",
+        },
+    ])
+
+
+def render_route_simulator_map(route_df, scenario_df, ports_df, reroute_df=None):
+    layers = []
+
+    if not scenario_df.empty:
+        layers.append(
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=scenario_df,
+                get_position='[longitude, latitude]',
+                get_fill_color="color",
+                get_radius="radius",
+                pickable=True,
+                opacity=0.35,
+            )
+        )
+
+    layers.append(
+        pdk.Layer(
+            "PathLayer",
+            data=route_df,
+            get_path="path",
+            get_color="color",
+            width_scale=20,
+            width_min_pixels=4,
+            pickable=True,
+        )
+    )
+
+    if reroute_df is not None and not reroute_df.empty:
+        layers.append(
+            pdk.Layer(
+                "PathLayer",
+                data=reroute_df,
+                get_path="path",
+                get_color="color",
+                width_scale=20,
+                width_min_pixels=4,
+                pickable=True,
+            )
+        )
+
+    layers.append(
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=ports_df,
+            get_position='[longitude, latitude]',
+            get_fill_color=[34, 197, 94, 220],
+            get_radius=90000,
+            pickable=True,
+        )
+    )
+
+    deck = pdk.Deck(
+        layers=layers,
+        initial_view_state=pdk.ViewState(latitude=20, longitude=20, zoom=1.4),
+        map_style="light",
+        tooltip={
+            "html": "<b>{name}</b><br/>{impact}",
+            "style": {"backgroundColor": "black", "color": "white"},
+        },
+    )
+
+    st.pydeck_chart(deck, use_container_width=True)
+
+
+def estimate_delay_days(selected_route_scenario, impacted):
+    if not impacted or selected_route_scenario == "None":
+        return 0
+
+    delay_map = {
+        "Strait of Hormuz Closure": "7–21 days",
+        "Red Sea Disruption": "7–18 days",
+        "Suez Canal Blockage": "10–20 days",
+        "Panama Canal Restriction": "6–14 days",
+        "Taiwan Strait Tension": "5–12 days",
+        "Cape Diversion Pressure": "4–10 days",
+        "South China Sea Tension": "5–15 days",
+        "North Pacific Storm Corridor": "3–9 days",
+    }
+    return delay_map.get(selected_route_scenario, "3–10 days")
+
+
+def get_reroute_points(start_port, end_port, selected_route_scenario):
+    start = [PORTS[start_port]["lon"], PORTS[start_port]["lat"]]
+    end = [PORTS[end_port]["lon"], PORTS[end_port]["lat"]]
+
+    reroute_templates = {
+        "Suez Canal Blockage": [start, [103.8519, 1.2903], [18.5, -34.0], end],
+        "Red Sea Disruption": [start, [103.8519, 1.2903], [18.5, -34.0], end],
+        "Panama Canal Restriction": [start, [-75.0, -55.0], end],
+        "Taiwan Strait Tension": [start, [114.0, 12.0], [103.8519, 1.2903], end],
+        "South China Sea Tension": [start, [135.0, 18.0], [95.0, 8.0], end],
+        "North Pacific Storm Corridor": [start, [10.0, 0.0], [140.0, -15.0], end],
+    }
+
+    return reroute_templates.get(selected_route_scenario)
 
 
 st.title("🌍 Supply Chain Risk Monitor")
@@ -323,6 +765,24 @@ selected_risk_levels = st.sidebar.multiselect(
     options=["High", "Medium", "Low"],
     default=["High", "Medium", "Low"]
 )
+
+st.sidebar.subheader("Route Simulator")
+
+simulator_mode = st.sidebar.checkbox("Enable Route Simulator", value=False)
+
+start_port = None
+end_port = None
+selected_route_scenario = "None"
+
+if simulator_mode:
+    port_names = sorted(PORTS.keys())
+    start_port = st.sidebar.selectbox("Start Port", port_names, index=0, key="route_start_port")
+    end_port = st.sidebar.selectbox("End Port", port_names, index=1, key="route_end_port")
+    selected_route_scenario = st.sidebar.selectbox(
+        "Route Scenario",
+        ["None"] + list(SCENARIO_ZONES.keys()),
+        key="route_scenario"
+    )
 
 if not events_df.empty:
     filtered_events = events_df[
@@ -613,11 +1073,93 @@ if selected_scenario != "None":
     except Exception as e:
         st.warning(f"AI scenario analysis unavailable: {e}")
 
+if simulator_mode and start_port and end_port:
+    st.divider()
+    st.subheader("Route Impact Simulator")
+
+    if start_port == end_port:
+        st.warning("Please select different start and end ports.")
+    else:
+        node_path, route_points, total_distance = build_dynamic_route(start_port, end_port)
+
+        if not route_points:
+            st.error("No route could be calculated for the selected ports.")
+        else:
+            impacted = False
+            scenario_df = pd.DataFrame()
+            reroute_df = pd.DataFrame()
+
+            if selected_route_scenario != "None":
+                scenario = SCENARIO_ZONES[selected_route_scenario]
+                impacted = route_impacted(route_points, scenario)
+                scenario_df = build_scenario_df(selected_route_scenario)
+
+                reroute_points = get_reroute_points(start_port, end_port, selected_route_scenario)
+                if impacted and reroute_points:
+                    reroute_df = build_route_df(reroute_points, reroute=True)
+
+            route_df = build_route_df(route_points, impacted=impacted)
+            ports_df = build_port_points_df(start_port, end_port)
+
+            render_route_simulator_map(
+                route_df=route_df,
+                scenario_df=scenario_df,
+                ports_df=ports_df,
+                reroute_df=reroute_df if not reroute_df.empty else None
+            )
+
+            sim_col1, sim_col2, sim_col3 = st.columns(3)
+            sim_col1.metric("Estimated Route Distance", f"{total_distance:,.0f} km")
+            sim_col2.metric("Scenario Selected", selected_route_scenario)
+            sim_col3.metric("Impact Status", "Impacted" if impacted else "Clear")
+
+            st.markdown("#### Calculated Maritime Path")
+            st.code(" → ".join(node_path))
+
+            if selected_route_scenario != "None":
+                delay = estimate_delay_days(selected_route_scenario, impacted)
+
+                if impacted:
+                    st.error(f"This route is impacted by {selected_route_scenario}.")
+                    st.write(f"**Expected Delay Impact:** {delay}")
+                    st.write("**Likely Effect:** Higher transit-time risk, schedule volatility, and potential freight cost escalation.")
+                    st.write("**Suggested Action:** Review alternate routing, rebalance safety stock, and evaluate backup sourcing.")
+
+                    if not reroute_df.empty:
+                        st.write("**Reroute Option Displayed:** A fallback detour path has been drawn in purple.")
+                else:
+                    st.success(f"This route is not directly impacted by {selected_route_scenario}.")
+                    st.write("**Expected Delay Impact:** None to limited direct impact based on current route geometry.")
+
+            if selected_route_scenario != "None":
+                route_scenario_context = {
+                    "start_port": start_port,
+                    "end_port": end_port,
+                    "scenario": selected_route_scenario,
+                    "route_impacted": impacted,
+                    "route_nodes": node_path,
+                    "estimated_distance_km": round(total_distance, 2),
+                }
+
+                try:
+                    with st.spinner("Generating AI route impact assessment..."):
+                        route_ai = cached_ai_scenario_commentary(
+                            json.dumps(route_scenario_context, sort_keys=True)
+                        )
+
+                    st.markdown("#### AI Route Assessment")
+                    st.write(f"**Summary:** {route_ai.get('scenario_summary', 'No summary available.')}")
+                    st.write(f"**Operational impact:** {route_ai.get('operational_impact', 'No operational impact available.')}")
+                    st.write(f"**Procurement impact:** {route_ai.get('procurement_impact', 'No procurement impact available.')}")
+                    st.write(f"**Recommended response:** {route_ai.get('recommended_response', 'No response available.')}")
+                except Exception as e:
+                    st.warning(f"AI route assessment unavailable: {e}")
+
 st.divider()
 st.markdown(
     """
     **How it works:**  
     The platform monitors live disruption signals, maps affected geographies, compares them with supplier locations and commodities in the uploaded BOM, and highlights parts that may need sourcing action.  
-    AI then interprets the event landscape, summarizes major risks, ranks alternate sourcing paths, and evaluates disruption scenarios.
+    AI then interprets the event landscape, summarizes major risks, ranks alternate sourcing paths, evaluates disruption scenarios, and simulates route exposure across major maritime corridors.
     """
 )
