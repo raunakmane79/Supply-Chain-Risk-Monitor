@@ -245,43 +245,43 @@ if uploaded_file is not None:
                 c3.metric("Low Risk Parts", low_risk_count)
 
                 display_cols = [
-                    "part_number",
-                    "part_name",
-                    "commodity",
-                    "supplier_country",
-                    "matched_event",
-                    "event_type",
-                    "impacted_commodity",
-                    "risk_score",
-                    "risk_level",
-                ]
-                existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
+    "part_number",
+    "part_name",
+    "commodity",
+    "supplier_country",
+    "matched_event",
+    "event_type",
+    "impacted_commodity",
+    "rule_trigger",
+    "risk_score",
+    "risk_level",
+]
+existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
 
-                st.dataframe(
-                    style_risk_table(filtered_risk_df[existing_display_cols]),
-                    use_container_width=True,
-                    hide_index=True
-                )
+st.dataframe(
+    filtered_risk_df[existing_display_cols],
+    use_container_width=True,
+    hide_index=True
+)
 
-                st.subheader("Priority Recommendations")
-                priority_df = filtered_risk_df[
-                    filtered_risk_df["risk_level"].isin(["High", "Medium"])
-                ].copy()
-
-                if not priority_df.empty:
-                    st.dataframe(
-                        priority_df[
-                            [
-                                "part_name",
-                                "supplier_country",
-                                "risk_level",
-                                "matched_event",
-                                "recommendation",
-                            ]
-                        ],
-                        use_container_width=True,
-                        hide_index=True
-                    )
+                st.subheader("Detailed Risk Explanation")
+st.dataframe(
+    filtered_risk_df[
+        [
+            "part_name",
+            "supplier_name",
+            "supplier_country",
+            "matched_event",
+            "risk_level",
+            "rule_trigger",
+            "inferred_commodities",
+            "reason",
+            "recommendation",
+        ]
+    ],
+    use_container_width=True,
+    hide_index=True
+)
                 else:
                     st.info("No high or medium risk parts under current filters.")
 
