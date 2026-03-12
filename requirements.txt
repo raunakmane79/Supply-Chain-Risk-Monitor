@@ -4,3 +4,4 @@ requests
 openpyxl
 pydeck
 plotly
+google-genai
