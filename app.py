@@ -77,19 +77,17 @@ def render_event_map(events_df: pd.DataFrame):
     )
 
     tooltip = {
-        "html": """
-        <b>Event:</b> {title}<br/>
-        <b>Type:</b> {event_type}<br/>
-        <b>Country:</b> {country}<br/>
-        <b>Commodity:</b> {commodity}<br/>
-        <b>Severity:</b> {severity}<br/>
-        <b>Source:</b> {source}
-        """,
-        "style": {
-            "backgroundColor": "black",
-            "color": "white"
-        }
-    }
+    "html": """
+    <b>Event:</b> {title}<br/>
+    <b>Type:</b> {event_type}<br/>
+    <b>Country:</b> {country}<br/>
+    <b>Commodity:</b> {commodity}<br/>
+    <b>Severity:</b> {severity}<br/>
+    <b>Source:</b> {source}<br/>
+    <b>Time:</b> {event_time}
+    """,
+    "style": {"backgroundColor": "black", "color": "white"},
+}
 
     deck = pdk.Deck(
         layers=[layer],
@@ -182,11 +180,11 @@ left_col, right_col = st.columns([1.05, 1])
 
 with left_col:
     st.subheader("Live Global Events")
-    event_display_cols = [
-        "event_type", "title", "country", "commodity", "severity", "source"
-    ]
-    existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
-    st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
+   event_display_cols = [
+    "event_type", "title", "country", "commodity", "severity", "source", "event_time"
+]
+existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
+st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
 
     source_summary = (
         filtered_events.groupby("source")
