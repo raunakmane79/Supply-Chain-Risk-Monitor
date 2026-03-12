@@ -228,83 +228,77 @@ if uploaded_file is not None:
 
             risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
 
-if not risk_df.empty:
-    risk_df = add_recommendations(risk_df, bom_df)
+            if not risk_df.empty:
 
-    filtered_risk_df = risk_df[risk_df["risk_level"].isin(selected_risk_levels)].copy()
+                risk_df = add_recommendations(risk_df, bom_df)
 
-    st.subheader("Affected BOM Items")
+                filtered_risk_df = risk_df[
+                    risk_df["risk_level"].isin(selected_risk_levels)
+                ].copy()
 
-    rc1, rc2, rc3 = st.columns(3)
-    rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
-    rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
-    rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
+                st.subheader("Affected BOM Items")
 
-    display_cols = [
-        "part_number",
-        "part_name",
-        "commodity",
-        "supplier_country",
-        "matched_event",
-        "event_type",
-        "impacted_commodity",
-        "rule_trigger",
-        "risk_score",
-        "risk_level",
-    ]
+                rc1, rc2, rc3 = st.columns(3)
+                rc1.metric("High Risk Parts", int((risk_df["risk_level"] == "High").sum()))
+                rc2.metric("Medium Risk Parts", int((risk_df["risk_level"] == "Medium").sum()))
+                rc3.metric("Low Risk Parts", int((risk_df["risk_level"] == "Low").sum()))
 
-    existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
+                display_cols = [
+                    "part_number",
+                    "part_name",
+                    "commodity",
+                    "supplier_country",
+                    "matched_event",
+                    "event_type",
+                    "impacted_commodity",
+                    "rule_trigger",
+                    "risk_score",
+                    "risk_level",
+                ]
 
-    st.dataframe(
-        filtered_risk_df[existing_display_cols],
-        use_container_width=True,
-        hide_index=True
-    )
-                st.subheader("Detailed Risk Explanation")
-st.dataframe(
-    filtered_risk_df[
-        [
-            "part_name",
-            "supplier_name",
-            "supplier_country",
-            "matched_event",
-            "risk_level",
-            "rule_trigger",
-            "inferred_commodities",
-            "reason",
-            "recommendation",
-        ]
-    ],
-    use_container_width=True,
-    hide_index=True
-)
-                else:
-                    st.info("No high or medium risk parts under current filters.")
+                existing_display_cols = [
+                    col for col in display_cols if col in filtered_risk_df.columns
+                ]
 
-                st.subheader("Detailed Risk Explanation")
                 st.dataframe(
-                    filtered_risk_df[
-                        [
-                            "part_name",
-                            "supplier_name",
-                            "supplier_country",
-                            "matched_event",
-                            "risk_level",
-                            "reason",
-                            "recommendation",
-                        ]
-                    ],
+                    filtered_risk_df[existing_display_cols],
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                st.subheader("Detailed Risk Explanation")
+
+                explanation_cols = [
+                    "part_name",
+                    "supplier_name",
+                    "supplier_country",
+                    "matched_event",
+                    "risk_level",
+                    "rule_trigger",
+                    "inferred_commodities",
+                    "reason",
+                    "recommendation",
+                ]
+
+                explanation_cols = [
+                    col for col in explanation_cols if col in filtered_risk_df.columns
+                ]
+
+                st.dataframe(
+                    filtered_risk_df[explanation_cols],
                     use_container_width=True,
                     hide_index=True
                 )
 
                 csv_export = filtered_risk_df.to_csv(index=False).encode("utf-8")
+
                 st.download_button(
                     label="Download Risk Analysis Results",
                     data=csv_export,
                     file_name="risk_analysis_results.csv",
                     mime="text/csv"
                 )
+
             else:
                 st.info("No BOM items are directly affected by the current live events.")
 
