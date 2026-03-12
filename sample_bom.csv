@@ -1,1 +1,5 @@
-
+part_number,part_name,commodity,material,supplier_name,supplier_country,supplier_city,annual_usage,unit_cost,criticality,alternate_supplier
+P1001,PCB Assembly,Semiconductor,Electronics,ABC Circuits,Taiwan,Taichung,5000,32,High,XYZ Electronics
+P1002,Copper Wiring,Copper,Metal,Metro Metals,Chile,Santiago,9000,6,Medium,Alt Copper Ltd
+P1003,Steel Bracket,Steel,Metal,ForgePro,India,Pune,12000,3,Low,SteelWorks
+P1004,Lithium Cell,Lithium,Battery Material,VoltSource,China,Shenzhen,7000,18,High,PowerCell
