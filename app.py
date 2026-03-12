@@ -30,10 +30,6 @@ st.set_page_config(
 
 st.markdown(
     """
-st.markdown(
-    """
-st.markdown(
-    """
     <style>
     :root {
         --bg: #f6f8fb;
