@@ -3,3 +3,19 @@ P1001,PCB Assembly,Semiconductor,Electronics,ABC Circuits,Taiwan,Taichung,5000,3
 P1002,Copper Wiring,Copper,Metal,Metro Metals,Chile,Santiago,9000,6,Medium,Alt Copper Ltd
 P1003,Steel Bracket,Steel,Metal,ForgePro,India,Pune,12000,3,Low,SteelWorks
 P1004,Lithium Cell,Lithium,Battery Material,VoltSource,China,Shenzhen,7000,18,High,PowerCell
+P1005,Aluminum Housing,Aluminum,Metal,AlloyTech,Germany,Berlin,8000,12,Medium,MetalWorks EU
+P1006,Nickel Connector,Nickel,Metal,NickelCore,Canada,Toronto,6000,8,Medium,Global Nickel Ltd
+P1007,Cobalt Cathode,Cobalt,Battery Material,BlueMinerals,DR Congo,Kolwezi,4500,20,High,AltBattery Inc
+P1008,Plastic Resin Body,Plastic Resin,Polymer,PolyChem,United States,Houston,10000,4,Low,ResinCorp
+P1009,Glass Panel,Silica,Glass,ClearView,China,Shanghai,7000,9,Medium,GlassWorks
+P1010,Rare Earth Magnet,Rare Earth Elements,Magnetic Material,NeoMag,China,Baotou,3000,25,High,MagTech
+P1011,Microcontroller,Microchips,Semiconductor,ChipCore,South Korea,Seoul,8000,15,High,SemiLogic
+P1012,Memory Module,Memory Chips,Semiconductor,DataChips,Taiwan,Hsinchu,6000,14,High,MemoryTech
+P1013,Hydraulic Pump Housing,Cast Iron,Metal,IronForge,India,Ahmedabad,5000,11,Medium,ForgeWorks
+P1014,Industrial Battery Pack,Batteries,Energy Storage,VoltEdge,China,Nanjing,4000,28,High,EnergyPack
+P1015,Fertilizer Compound,Fertilizers,Chemical,AgriChem,Canada,Calgary,7000,7,Low,FarmChem
+P1016,Ammonia Tank Input,Ammonia,Chemical,GreenChem,United States,Texas City,4500,10,Medium,AltChem
+P1017,Hydrogen Storage Unit,Hydrogen,Energy,CleanFuel,Germany,Hamburg,2000,35,High,H2Systems
+P1018,Rubber Gasket,Rubber,Polymer,FlexSeal,Thailand,Bangkok,9000,2,Low,SealTech
+P1019,Electronic Sensor,Electronics,Electronic Component,SenseCore,Japan,Osaka,5500,16,Medium,SenseWorks
+P1020,Steel Fastener Set,Steel,Metal,FastenPro,United States,Detroit,15000,1,Low,BoltWorks
