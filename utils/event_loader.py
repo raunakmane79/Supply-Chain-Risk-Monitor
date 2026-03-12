@@ -290,3 +290,23 @@ def load_all_events() -> pd.DataFrame:
     ).reset_index(drop=True)
 
     return combined
+conflict_df = fetch_gdelt_conflict_events()
+    if not conflict_df.empty:
+        frames.append(conflict_df)
+
+    if not frames:
+        return pd.DataFrame(
+            columns=[
+                "title",
+                "event_type",
+                "country",
+                "commodity",
+                "severity",
+                "source",
+                "event_time",
+                "latitude",
+                "longitude",
+            ]
+        )
+
+    return pd.concat(frames, ignore_index=True)
