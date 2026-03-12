@@ -207,7 +207,11 @@ def render_timeline(events_df: pd.DataFrame):
         return
 
     df = events_df.copy()
-    df["event_time"] = pd.to_datetime(df["event_time"], errors="coerce")
+
+    # Force datetime conversion safely
+    df["event_time"] = pd.to_datetime(df["event_time"], errors="coerce", utc=True)
+
+    # Drop anything that could not be parsed
     df = df.dropna(subset=["event_time"])
 
     if df.empty:
@@ -216,6 +220,11 @@ def render_timeline(events_df: pd.DataFrame):
 
     df["hour_bucket"] = df["event_time"].dt.floor("h")
     timeline = df.groupby("hour_bucket").size().reset_index(name="event_count")
+
+    if timeline.empty:
+        st.info("No timeline data available.")
+        return
+
     st.line_chart(timeline.set_index("hour_bucket"))
 
 
