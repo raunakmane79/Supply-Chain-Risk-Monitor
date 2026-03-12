@@ -226,7 +226,7 @@ if uploaded_file is not None:
                 if "commodity" in bom_df.columns:
                     st.metric("Tracked BOM Commodities", bom_df["commodity"].replace("", pd.NA).dropna().nunique())
 
-            risk_df = analyze_bom_risk(bom_df, filtered_events)
+            risk_df = analyze_bom_risk(bom_df, filtered_events, home_country="United States")
 
             if not risk_df.empty:
                 risk_df = add_recommendations(risk_df, bom_df)
