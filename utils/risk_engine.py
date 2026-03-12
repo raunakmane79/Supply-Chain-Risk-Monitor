@@ -267,3 +267,16 @@ def analyze_bom_risk(
         return ["Logistics", "Imported Parts"]
 
     return []
+    event_commodities = infer_conflict_commodities(event["title"], event["country"])
+
+if bom_row["commodity"] in event_commodities:
+    risk_score += 35
+    rule_trigger.append("Commodity exposure from geopolitical conflict")
+
+if bom_row["supplier_country"] == event["country"]:
+    risk_score += 30
+    rule_trigger.append("Supplier country directly affected")
+
+if bom_row.get("criticality", "") == "High":
+    risk_score += 20
+    rule_trigger.append("High criticality part")
