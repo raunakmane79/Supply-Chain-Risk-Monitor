@@ -5,6 +5,7 @@ import pydeck as pdk
 from utils.bom_parser import load_bom, validate_bom, clean_bom, get_bom_template
 from utils.risk_engine import analyze_bom_risk
 from utils.recommender import add_recommendations
+from utils.event_loader import load_all_events
 
 
 st.set_page_config(
@@ -14,55 +15,18 @@ st.set_page_config(
 )
 
 
-def load_sample_events() -> pd.DataFrame:
-    data = [
-        {
-            "event_type": "Earthquake",
-            "title": "Major earthquake near Taiwan",
-            "country": "Taiwan",
-            "commodity": "Semiconductor",
-            "severity": "High",
-            "latitude": 23.6978,
-            "longitude": 120.9605,
-        },
-        {
-            "event_type": "Flood",
-            "title": "Flooding impacting port operations in China",
-            "country": "China",
-            "commodity": "Electronics",
-            "severity": "Medium",
-            "latitude": 31.2304,
-            "longitude": 121.4737,
-        },
-        {
-            "event_type": "Conflict",
-            "title": "Conflict risk affecting metal shipments",
-            "country": "Ukraine",
-            "commodity": "Steel",
-            "severity": "High",
-            "latitude": 50.4501,
-            "longitude": 30.5234,
-        },
-        {
-            "event_type": "Storm",
-            "title": "Storm disruption near Chile logistics corridor",
-            "country": "Chile",
-            "commodity": "Copper",
-            "severity": "Medium",
-            "latitude": -33.4489,
-            "longitude": -70.6693,
-        }
-    ]
-    return pd.DataFrame(data)
+@st.cache_data(ttl=900)
+def get_live_events() -> pd.DataFrame:
+    return load_all_events()
 
 
 def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
     df = events_df.copy()
 
     color_map = {
-        "High": [220, 38, 38, 180],     # red
-        "Medium": [245, 158, 11, 180],  # amber
-        "Low": [34, 197, 94, 180],      # green
+        "High": [220, 38, 38, 180],
+        "Medium": [245, 158, 11, 180],
+        "Low": [34, 197, 94, 180],
     }
 
     radius_map = {
@@ -71,8 +35,10 @@ def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
         "Low": 50000,
     }
 
-    df["color"] = df["severity"].map(color_map)
-    df["radius"] = df["severity"].map(radius_map)
+    df["color"] = df["severity"].map(color_map).apply(
+        lambda x: x if isinstance(x, list) else [100, 100, 255, 160]
+    )
+    df["radius"] = df["severity"].map(radius_map).fillna(60000)
 
     return df
 
@@ -102,7 +68,7 @@ def render_event_map(events_df: pd.DataFrame):
     view_state = pdk.ViewState(
         latitude=20,
         longitude=0,
-        zoom=1.2,
+        zoom=1.1,
         pitch=0,
     )
 
@@ -112,7 +78,8 @@ def render_event_map(events_df: pd.DataFrame):
         <b>Type:</b> {event_type}<br/>
         <b>Country:</b> {country}<br/>
         <b>Commodity:</b> {commodity}<br/>
-        <b>Severity:</b> {severity}
+        <b>Severity:</b> {severity}<br/>
+        <b>Source:</b> {source}
         """,
         "style": {
             "backgroundColor": "black",
@@ -124,7 +91,7 @@ def render_event_map(events_df: pd.DataFrame):
         layers=[layer],
         initial_view_state=view_state,
         tooltip=tooltip,
-        map_style="mapbox://styles/mapbox/dark-v10",
+        map_style="light",
     )
 
     st.pydeck_chart(deck, use_container_width=True)
@@ -138,23 +105,27 @@ st.markdown(
     """
 )
 
-# Sidebar
 st.sidebar.header("Controls")
 uploaded_file = st.sidebar.file_uploader(
     "Upload BOM file",
     type=["csv", "xlsx", "xls"]
 )
 
+events_df = get_live_events()
+
+event_type_options = sorted(events_df["event_type"].dropna().unique().tolist())
+severity_options = sorted(events_df["severity"].dropna().unique().tolist())
+
 selected_event_types = st.sidebar.multiselect(
     "Filter by Event Type",
-    options=["Earthquake", "Flood", "Conflict", "Storm", "Wildfire", "Protest"],
-    default=["Earthquake", "Flood", "Conflict", "Storm"]
+    options=event_type_options,
+    default=event_type_options
 )
 
 selected_severity = st.sidebar.multiselect(
     "Filter by Severity",
-    options=["High", "Medium", "Low"],
-    default=["High", "Medium", "Low"]
+    options=severity_options,
+    default=severity_options
 )
 
 selected_risk_levels = st.sidebar.multiselect(
@@ -162,8 +133,6 @@ selected_risk_levels = st.sidebar.multiselect(
     options=["High", "Medium", "Low"],
     default=["High", "Medium", "Low"]
 )
-
-events_df = load_sample_events()
 
 filtered_events = events_df[
     events_df["event_type"].isin(selected_event_types) &
@@ -182,7 +151,11 @@ left_col, right_col = st.columns([1.1, 1])
 
 with left_col:
     st.subheader("Live Global Events")
-    st.dataframe(filtered_events, use_container_width=True, hide_index=True)
+    event_display_cols = [
+        "event_type", "title", "country", "commodity", "severity", "source"
+    ]
+    existing_cols = [col for col in event_display_cols if col in filtered_events.columns]
+    st.dataframe(filtered_events[existing_cols], use_container_width=True, hide_index=True)
 
 with right_col:
     st.subheader("Live Risk Map")
@@ -234,8 +207,10 @@ if uploaded_file is not None:
                     "risk_level",
                 ]
 
+                existing_display_cols = [col for col in display_cols if col in filtered_risk_df.columns]
+
                 st.dataframe(
-                    filtered_risk_df[display_cols],
+                    filtered_risk_df[existing_display_cols],
                     use_container_width=True,
                     hide_index=True
                 )
