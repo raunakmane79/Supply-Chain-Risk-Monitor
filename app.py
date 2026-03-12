@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import json
 
 sys.path.append(str(Path(__file__).parent.resolve()))
 
@@ -25,9 +26,91 @@ st.set_page_config(
 )
 
 
+SCENARIOS = {
+    "Strait of Hormuz Closure": {
+        "countries": ["Iran"],
+        "commodities": ["Crude Oil", "Natural Gas", "LNG", "Petrochemicals", "Oil"],
+        "event_type": "Conflict",
+        "severity": "High",
+        "latitude": 26.5667,
+        "longitude": 56.25,
+    },
+    "Taiwan Semiconductor Disruption": {
+        "countries": ["Taiwan"],
+        "commodities": ["Semiconductor", "Microchips", "Memory Chips", "Electronics"],
+        "event_type": "Conflict",
+        "severity": "High",
+        "latitude": 23.7,
+        "longitude": 121.0,
+    },
+    "Chile Copper Strike": {
+        "countries": ["Chile"],
+        "commodities": ["Copper"],
+        "event_type": "Protest",
+        "severity": "High",
+        "latitude": -33.4489,
+        "longitude": -70.6693,
+    },
+    "Red Sea Shipping Delays": {
+        "countries": ["Yemen", "Egypt", "Red Sea"],
+        "commodities": ["Shipping", "Logistics", "Imported Parts"],
+        "event_type": "Shipping Disruption",
+        "severity": "High",
+        "latitude": 20.0,
+        "longitude": 38.0,
+    },
+}
+
+
 @st.cache_data(ttl=900)
 def get_live_events() -> pd.DataFrame:
     return load_all_events()
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def cached_ai_risk_commentary(events_summary_json: str, bom_summary_json: str):
+    return generate_ai_risk_commentary(
+        json.loads(events_summary_json),
+        json.loads(bom_summary_json),
+    )
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def cached_ai_alternate_sources(part_context_json: str):
+    return rank_alternate_sources(json.loads(part_context_json))
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def cached_ai_scenario_commentary(scenario_context_json: str):
+    return generate_scenario_commentary(json.loads(scenario_context_json))
+
+
+def apply_scenario(events_df: pd.DataFrame, selected_scenario: str) -> pd.DataFrame:
+    if selected_scenario == "None":
+        return events_df
+
+    scenario = SCENARIOS[selected_scenario]
+
+    synthetic = pd.DataFrame([
+        {
+            "event_type": scenario["event_type"],
+            "title": selected_scenario,
+            "country": ", ".join(scenario["countries"]),
+            "commodity": scenario["commodities"][0],
+            "severity": scenario["severity"],
+            "latitude": scenario["latitude"],
+            "longitude": scenario["longitude"],
+            "source": "Scenario Simulator",
+            "magnitude": None,
+            "event_time": pd.Timestamp.utcnow(),
+            "url": "",
+        }
+    ])
+
+    if events_df.empty:
+        return synthetic
+
+    return pd.concat([events_df, synthetic], ignore_index=True)
 
 
 def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
@@ -43,6 +126,8 @@ def add_map_styles(events_df: pd.DataFrame) -> pd.DataFrame:
             return [249, 115, 22, 210]
         if event_type == "Shipping Disruption":
             return [245, 158, 11, 210]
+        if event_type == "Scenario":
+            return [99, 102, 241, 210]
 
         if severity == "High":
             return [220, 38, 38, 180]
@@ -116,6 +201,72 @@ def render_event_map(events_df: pd.DataFrame):
     st.pydeck_chart(deck, use_container_width=True)
 
 
+def render_timeline(events_df: pd.DataFrame):
+    if events_df.empty or "event_time" not in events_df.columns:
+        st.info("No timeline data available.")
+        return
+
+    df = events_df.copy()
+    df["event_time"] = pd.to_datetime(df["event_time"], errors="coerce")
+    df = df.dropna(subset=["event_time"])
+
+    if df.empty:
+        st.info("No valid event times available.")
+        return
+
+    df["hour_bucket"] = df["event_time"].dt.floor("h")
+    timeline = df.groupby("hour_bucket").size().reset_index(name="event_count")
+    st.line_chart(timeline.set_index("hour_bucket"))
+
+
+REGION_MAP = {
+    "China": "Asia",
+    "Taiwan": "Asia",
+    "Japan": "Asia",
+    "India": "Asia",
+    "South Korea": "Asia",
+    "Singapore": "Asia",
+    "Vietnam": "Asia",
+    "Iran": "Middle East",
+    "Israel": "Middle East",
+    "Egypt": "Middle East",
+    "Yemen": "Middle East",
+    "Ukraine": "Europe",
+    "Russia": "Europe",
+    "Germany": "Europe",
+    "Chile": "South America",
+    "Brazil": "South America",
+    "Peru": "South America",
+    "United States": "North America",
+    "Canada": "North America",
+    "Mexico": "North America",
+}
+
+
+def add_region(events_df: pd.DataFrame) -> pd.DataFrame:
+    df = events_df.copy()
+    df["region"] = df["country"].map(REGION_MAP).fillna("Other")
+    return df
+
+
+def render_regional_summary(events_df: pd.DataFrame):
+    if events_df.empty:
+        st.info("No regional data available.")
+        return
+
+    df = add_region(events_df)
+    summary = (
+        df.groupby("region")
+        .agg(
+            live_events=("title", "count"),
+            countries=("country", "nunique")
+        )
+        .reset_index()
+        .sort_values("live_events", ascending=False)
+    )
+    st.dataframe(summary, use_container_width=True, hide_index=True)
+
+
 st.title("🌍 Supply Chain Risk Monitor")
 st.caption(
     "Track global disruptions, upload a bill of materials, and identify exposed parts with sourcing recommendations."
@@ -131,6 +282,11 @@ st.sidebar.header("Controls")
 uploaded_file = st.sidebar.file_uploader(
     "Upload BOM file",
     type=["csv", "xlsx", "xls"]
+)
+
+selected_scenario = st.sidebar.selectbox(
+    "Scenario Simulator",
+    options=["None"] + list(SCENARIOS.keys())
 )
 
 events_df = get_live_events()
@@ -167,6 +323,8 @@ if not events_df.empty:
 else:
     filtered_events = pd.DataFrame()
 
+filtered_events = apply_scenario(filtered_events, selected_scenario)
+
 st.markdown("### Executive Summary")
 col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Live Events", len(filtered_events))
@@ -179,6 +337,19 @@ legend_col1, legend_col2, legend_col3 = st.columns(3)
 legend_col1.markdown("🟥 **High Risk / Conflict**")
 legend_col2.markdown("🟨 **Medium Risk / Shipping / Sanctions**")
 legend_col3.markdown("🟩 **Low Risk / General**")
+
+ai_commentary = None
+risk_df = pd.DataFrame()
+filtered_risk_df = pd.DataFrame()
+
+events_summary = {
+    "live_events": int(len(filtered_events)),
+    "high_severity_events": int((filtered_events["severity"] == "High").sum()) if not filtered_events.empty else 0,
+    "top_countries": filtered_events["country"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
+    "top_commodities": filtered_events["commodity"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
+    "top_event_types": filtered_events["event_type"].astype(str).value_counts().head(5).to_dict() if not filtered_events.empty else {},
+    "selected_scenario": selected_scenario,
+}
 
 st.divider()
 
@@ -211,9 +382,15 @@ with left_col:
     else:
         st.info("No events match the current filters.")
 
+    st.markdown("#### Timeline View")
+    render_timeline(filtered_events)
+
 with right_col:
     st.subheader("Live Risk Map")
     render_event_map(filtered_events)
+
+    st.markdown("#### Regional Summary Panel")
+    render_regional_summary(filtered_events)
 
 st.divider()
 st.subheader("BOM Risk Analysis")
@@ -326,10 +503,112 @@ else:
         mime="text/csv"
     )
 
+bom_summary = {}
+if not risk_df.empty:
+    bom_summary = {
+        "high_risk_parts": int((risk_df["risk_level"] == "High").sum()),
+        "medium_risk_parts": int((risk_df["risk_level"] == "Medium").sum()),
+        "top_impacted_countries": risk_df["supplier_country"].astype(str).value_counts().head(5).to_dict(),
+        "top_impacted_commodities": risk_df["commodity"].astype(str).value_counts().head(5).to_dict(),
+    }
+
+try:
+    if events_summary or bom_summary:
+        with st.spinner("Generating AI risk commentary..."):
+            ai_commentary = cached_ai_risk_commentary(
+                json.dumps(events_summary, sort_keys=True),
+                json.dumps(bom_summary, sort_keys=True),
+            )
+except Exception as e:
+    st.warning(f"AI commentary unavailable: {e}")
+
+if ai_commentary:
+    st.divider()
+    st.subheader("AI Risk Commentary")
+    st.info(ai_commentary.get("executive_summary", "No commentary available."))
+    st.write(f"**Urgency:** {ai_commentary.get('urgency', 'Unknown')}")
+    st.write("**Top risks:**")
+    for item in ai_commentary.get("top_risks", []):
+        st.write(f"- {item}")
+    st.write(f"**Recommended action:** {ai_commentary.get('recommended_action', 'No recommendation available.')}")
+
+if not filtered_risk_df.empty:
+    st.divider()
+    st.subheader("AI Alternate Sourcing Prioritization")
+
+    part_options = filtered_risk_df["part_name"].dropna().astype(str).tolist()
+    if part_options:
+        selected_part = st.selectbox("Select impacted part", options=part_options)
+
+        selected_row = filtered_risk_df[filtered_risk_df["part_name"].astype(str) == selected_part].iloc[0]
+
+        part_context = {
+            "part_name": selected_row.get("part_name", ""),
+            "commodity": selected_row.get("commodity", ""),
+            "supplier_country": selected_row.get("supplier_country", ""),
+            "risk_level": selected_row.get("risk_level", ""),
+            "matched_event": selected_row.get("matched_event", ""),
+            "event_type": selected_row.get("event_type", ""),
+            "criticality": selected_row.get("criticality", ""),
+            "current_supplier": selected_row.get("supplier_name", ""),
+            "alternate_suppliers": [
+                {
+                    "supplier": selected_row.get("alternate_supplier", ""),
+                    "country": selected_row.get("alternate_supplier_country", ""),
+                }
+            ],
+        }
+
+        try:
+            with st.spinner("Ranking alternate suppliers with AI..."):
+                alt_result = cached_ai_alternate_sources(
+                    json.dumps(part_context, sort_keys=True)
+                )
+
+            st.write(f"**Best option:** {alt_result.get('best_option', 'N/A')}")
+            for item in alt_result.get("ranking", []):
+                st.write(f"{item.get('rank', '-')}. {item.get('supplier', 'Unknown')} — Score: {item.get('score', 'N/A')}")
+                st.caption(item.get("reason", ""))
+            st.write(f"**Switch recommendation:** {alt_result.get('switch_recommendation', 'No recommendation available.')}")
+        except Exception as e:
+            st.warning(f"AI alternate sourcing unavailable: {e}")
+
+if selected_scenario != "None":
+    st.divider()
+    st.subheader("AI Scenario Assessment")
+
+    scenario_context = {
+        "scenario": selected_scenario,
+        "visible_events": int(len(filtered_events)),
+        "affected_commodities": filtered_events["commodity"].astype(str).value_counts().head(10).to_dict() if not filtered_events.empty else {},
+        "affected_countries": filtered_events["country"].astype(str).value_counts().head(10).to_dict() if not filtered_events.empty else {},
+    }
+
+    if not risk_df.empty:
+        scenario_context["bom_exposure"] = {
+            "high_risk_parts": int((risk_df["risk_level"] == "High").sum()),
+            "medium_risk_parts": int((risk_df["risk_level"] == "Medium").sum()),
+            "top_parts": risk_df["part_name"].astype(str).head(10).tolist(),
+        }
+
+    try:
+        with st.spinner("Generating AI scenario assessment..."):
+            scenario_ai = cached_ai_scenario_commentary(
+                json.dumps(scenario_context, sort_keys=True)
+            )
+
+        st.write(f"**Summary:** {scenario_ai.get('scenario_summary', 'No summary available.')}")
+        st.write(f"**Operational impact:** {scenario_ai.get('operational_impact', 'No operational impact available.')}")
+        st.write(f"**Procurement impact:** {scenario_ai.get('procurement_impact', 'No procurement impact available.')}")
+        st.write(f"**Recommended response:** {scenario_ai.get('recommended_response', 'No response available.')}")
+    except Exception as e:
+        st.warning(f"AI scenario analysis unavailable: {e}")
+
 st.divider()
 st.markdown(
     """
     **How it works:**  
-    The platform monitors live disruption signals, maps affected geographies, compares them with supplier locations and commodities in the uploaded BOM, and highlights parts that may need sourcing action.
+    The platform monitors live disruption signals, maps affected geographies, compares them with supplier locations and commodities in the uploaded BOM, and highlights parts that may need sourcing action.  
+    AI then interprets the event landscape, summarizes major risks, ranks alternate sourcing paths, and evaluates disruption scenarios.
     """
 )
