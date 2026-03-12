@@ -1,0 +1,65 @@
+{
+  "Conflict": {
+    "default_commodities": ["Oil", "Gas", "Metals", "Steel", "Shipping"],
+    "country_overrides": {
+      "Ukraine": ["Steel", "Metals", "Grain", "Shipping"],
+      "Russia": ["Oil", "Gas", "Metals", "Nickel"],
+      "Israel": ["Oil", "Gas", "Shipping"],
+      "Iran": ["Oil", "Gas", "Shipping"]
+    }
+  },
+  "Logistics": {
+    "default_commodities": ["Imported Parts", "Shipping", "Containers", "General Materials"],
+    "country_overrides": {
+      "Panama": ["Imported Parts", "Shipping", "Containers"],
+      "Egypt": ["Imported Parts", "Shipping", "Oil", "Gas"],
+      "Singapore": ["Imported Parts", "Shipping", "Electronics"],
+      "China": ["Imported Parts", "Electronics", "Machinery"]
+    }
+  },
+  "Flood": {
+    "default_commodities": ["Logistics", "Agriculture", "Chemicals"],
+    "country_overrides": {
+      "China": ["Electronics", "Imported Parts", "Chemicals"],
+      "Taiwan": ["Semiconductor", "Electronics", "PCB"],
+      "Japan": ["Semiconductor", "Electronics", "Automotive"],
+      "Vietnam": ["Electronics", "Imported Parts", "Textiles"],
+      "Philippines": ["Electronics", "Nickel"]
+    },
+    "region_overrides": {
+      "East Asia": ["Semiconductor", "Electronics", "Precision Components", "PCB"]
+    }
+  },
+  "Storm": {
+    "default_commodities": ["Logistics", "Ports", "Agriculture"],
+    "country_overrides": {
+      "China": ["Electronics", "Imported Parts"],
+      "Taiwan": ["Semiconductor", "Electronics"],
+      "Japan": ["Semiconductor", "Electronics", "Automotive"],
+      "Philippines": ["Electronics", "Nickel"],
+      "Chile": ["Copper", "Mining", "Ports"]
+    },
+    "region_overrides": {
+      "East Asia": ["Semiconductor", "Electronics", "Precision Components", "PCB"]
+    }
+  },
+  "Protest": {
+    "default_commodities": ["Manufacturing", "Shipping", "General Materials"],
+    "country_overrides": {
+      "Chile": ["Copper", "Lithium", "Mining"],
+      "Peru": ["Copper", "Mining"],
+      "Argentina": ["Lithium", "Mining"],
+      "South Africa": ["Metals", "Mining"],
+      "Australia": ["Lithium", "Metals", "Mining"],
+      "Brazil": ["Steel", "Mining", "Metals"]
+    }
+  },
+  "Earthquake": {
+    "default_commodities": ["Machinery", "Electronics"],
+    "country_overrides": {
+      "Taiwan": ["Semiconductor", "Electronics", "PCB"],
+      "Japan": ["Semiconductor", "Electronics", "Automotive"],
+      "China": ["Electronics", "Machinery"]
+    }
+  }
+}
