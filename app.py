@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.resolve()))
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
