@@ -9,7 +9,7 @@ except ImportError as e:
     ) from e
 
 
-client = genai.Client(api_key=st.secrets["AIzaSyDNMk0aDVMPfy0_321V9FpUeasLY9thgQw"])
+client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 
 def _extract_text(response) -> str:
